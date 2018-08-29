@@ -1,0 +1,6 @@
+{
+    "cachingSaveFileError": "Failed to save cache file!",
+    "cachingGetFilePathError": "Failed to get cache file path!",
+
+    "dataBinderPhpFileNotFound": "PHP document was not found!"
+}
