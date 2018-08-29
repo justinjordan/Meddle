@@ -13,6 +13,7 @@ class Transpiler
     public static function transpile(string $templateContents, string $cacheDir = null)
     {
         $templateContents = self::removePHP($templateContents);
+
         $document = new \DOMDocument('1.0', 'UTF-8');
         $document->loadHTML($templateContents);
 
@@ -68,7 +69,7 @@ class Transpiler
      */
     private static function removePHP(string $templateContent)
     {
-        $templateContent = preg_replace("/(<\?php)([\s\S]+)(\?>)/", '', $templateContent);
+        $templateContent = preg_replace("/(<\?)([\s\S]+)(\?>)/", '', $templateContent);
         return $templateContent;
     }
 }
