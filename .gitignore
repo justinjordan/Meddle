@@ -1,4 +1,7 @@
-# Created by https://www.gitignore.io/api/macos
+### Composer ###
+composer.phar
+vendor
+composer.lock
 
 ### Meddle ###
 cache
@@ -30,6 +33,3 @@ Icon
 Network Trash Folder
 Temporary Items
 .apdisk
-
-
-# End of https://www.gitignore.io/api/macos

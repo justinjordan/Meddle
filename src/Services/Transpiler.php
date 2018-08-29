@@ -43,13 +43,26 @@ class Transpiler
 
     private static function evaluate(string $input)
     {
-        $output = $input;
+        $parts = explode('+', $input);
+        $parts = array_map('trim', $parts);
 
-        /** Plusses to dots */
-        $output = preg_replace("/([^0-9\s][\s]*)([\+])/", '$1.', $output);
+        $isArithmetic = true;
+        foreach ($parts as &$part) {
+            if (preg_match("/^['\"][\s\S]*['\"]$/", $part)) {
+                /** is a string */
+                $isArithmetic = false;
+            } else {
+                /** Add dollar sign to variables */
+                $part = preg_replace("/([\+^'\")([a-z_]+[a-z0-9_]*)/i", "\$$1", $part);
+            }
+        }
 
-        /** Add dollar sign to variables */
-        $output = preg_replace("/([a-z]+[a-z0-9]*)/i", "\$$1", $output);
+        $output = '';
+        if ($isArithmetic) {
+            $output = implode('+', $parts);
+        } else {
+            $output = implode('.', $parts);
+        }
 
         return $output;
     }

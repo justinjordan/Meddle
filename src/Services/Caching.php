@@ -7,6 +7,8 @@ use Meddle\ErrorHandling\ErrorMessagePool;
 
 class Caching
 {
+    private static $cacheDir;
+
     /**
      * Saves file to cache directory.
      *
@@ -18,7 +20,7 @@ class Caching
      */
     public static function saveFile(string $hash, string $type, string $content)
     {
-        $cacheDir = dirname(__DIR__, 2).'/cache';
+        $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
 
         $bytes = false;
         $type = strtolower($type);
@@ -51,8 +53,8 @@ class Caching
      */
     public static function getFilePath(string $hash, string $type)
     {
+        $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
         $type = strtolower($type);
-        $cacheDir = dirname(__DIR__, 2).'/cache';
         $path = "$cacheDir/$type/$hash.$type";
 
         if (!file_exists($path)) {
@@ -60,5 +62,14 @@ class Caching
         }
 
         return $path;
+    }
+
+    /**
+     * @param string $cacheDir
+     * @return void
+     */
+    public static function setCacheDirectory(string $cacheDir)
+    {
+        self::$cacheDir;
     }
 }

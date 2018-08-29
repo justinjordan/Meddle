@@ -1,7 +1,9 @@
 <?php
 
-require '../src/autoload.php';
+require '../autoload.php';
 
-Meddle\Document::render('template.html', [
+echo Meddle\Document::render('template.html', [
     'secretMessage'    => 'Hello, world!'
+], [
+    'devMode'   => true
 ]);
