@@ -19,7 +19,7 @@ class DataBinder
         try {
             ob_start();
             extract($data);
-            include($phpDocPath);
+            @include($phpDocPath);
             $output = ob_get_clean();
         } catch (\Throwable $e) {
             throw new SyntaxException("Syntax error in template.");

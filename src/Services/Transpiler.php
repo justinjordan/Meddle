@@ -17,6 +17,65 @@ class Transpiler
         $document = new \DOMDocument('1.0', 'UTF-8');
         $document->loadHTML($templateContents);
 
+        /** Conditionals */
+        $xpath = new \DOMXPath($document);
+        $nodes = $xpath->query('//*[@mdl-if]');
+        foreach ($nodes as $node) {
+            $attrValue = self::evaluate($node->getAttribute('mdl-if'));
+            $node->removeAttribute('mdl-if');
+            $parent = $node->parentNode;
+
+            $openingTag = $document->createTextNode("{? if ($attrValue): ?}");
+            $closingTag = $document->createTextNode("{? endif; ?}\n");
+
+            $parent->insertBefore($openingTag, $node);
+            if ($node->nextSibling) {
+                $parent->insertBefore($closingTag, $node->nextSibling);
+            } else {
+                $parent->appendChild($closingTag);
+            }
+        }
+
+        /** Foreach Loops */
+        $attr = 'mdl-foreach';
+        $xpath = new \DOMXPath($document);
+        $nodes = $xpath->query("//*[@$attr]");
+        foreach ($nodes as $node) {
+            $attrValue = self::evaluate($node->getAttribute($attr));
+            $node->removeAttribute($attr);
+            $parent = $node->parentNode;
+
+            $openingTag = $document->createTextNode("{? foreach ($attrValue): ?}");
+            $closingTag = $document->createTextNode("{? endforeach; ?}\n");
+
+            $parent->insertBefore($openingTag, $node);
+            if ($node->nextSibling) {
+                $parent->insertBefore($closingTag, $node->nextSibling);
+            } else {
+                $parent->appendChild($closingTag);
+            }
+        }
+
+        /** For Loops */
+        $attr = 'mdl-for';
+        $xpath = new \DOMXPath($document);
+        $nodes = $xpath->query("//*[@$attr]");
+        foreach ($nodes as $node) {
+            $attrValue = self::evaluate($node->getAttribute($attr));
+            $node->removeAttribute($attr);
+            $parent = $node->parentNode;
+
+            $openingTag = $document->createTextNode("{? for ($attrValue): ?}");
+            $closingTag = $document->createTextNode("{? endfor; ?}\n");
+
+            $parent->insertBefore($openingTag, $node);
+            if ($node->nextSibling) {
+                $parent->insertBefore($closingTag, $node->nextSibling);
+            } else {
+                $parent->appendChild($closingTag);
+            }
+        }
+
         /** Interpolate Tags */
         $xpath = new \DOMXPath($document);
         $nodes = $xpath->query("//text()");
@@ -25,9 +84,9 @@ class Transpiler
         }
 
         $html = $document->saveHTML();
-        $phpDocument = self::replacePseudoTags($html);
+        $html = self::replacePseudoTags($html);
 
-        return $phpDocument;
+        return $html;
     }
 
     /**
@@ -74,8 +133,15 @@ class Transpiler
 
     private static function replacePseudoTags(string $input) {
         $output = $input;
+        
+        /** Decode HTML Special Chars */
+        $output = preg_replace_callback("/\{\?([^\?]*)\?\}/", function ($m) {
+            return htmlspecialchars_decode($m[0]);
+        }, $output);
+
         $output = str_replace('{?', '<?php', $output);
         $output = str_replace('?}', '?>', $output);
+        
         return $output;
     }
 

@@ -7,7 +7,20 @@
     <title>Meddle Example</title>
 </head>
 <body>
-    <p>{{ $myMessage }}</p>
     <p>{{ toUpper('this should be in all caps') }}</p>
+    <p mdl-if="$myMessage">{{ $myMessage }}</p>
+
+    <ul>
+        <li mdl-foreach="[[1,2,3],[4,5,6],[7,8,9]] as $numbers">
+            <ul>
+                <li mdl-foreach="$numbers as $number">{{ $number }}</li>
+            </ul>
+        </li>
+    </ul>
+
+    <ul>
+        <li mdl-for="$i = 0; $i < 10; $i++">{{ $i }}</li>
+    </ul>
+
     <p>{%duration%} to render!</p>
 </html>
