@@ -10,7 +10,7 @@ class Transpiler
      * @param string $templateContents
      * @return string PHP document.
      */
-    public static function transpile(string $templateContents, string $cacheDir = null)
+    public static function transpile(string $templateContents)
     {
         $templateContents = self::removePHP($templateContents);
 
@@ -30,6 +30,12 @@ class Transpiler
         return $phpDocument;
     }
 
+    /**
+     * Finds and replaces all mustache tags with PHP tags
+     *
+     * @param string $text
+     * @return string Returns replaced text
+     */
     private static function replaceTags(string $text)
     {
         $text = preg_replace_callback("/{{([^}]*)}}/", function ($m) {
@@ -41,28 +47,27 @@ class Transpiler
         return $text;
     }
 
+    /**
+     * Converts Meddle syntax to PHP
+     *
+     * @param string $input Meddle statement
+     * @return string PHP statement
+     */
     private static function evaluate(string $input)
     {
-        $parts = explode('+', $input);
-        $parts = array_map('trim', $parts);
+        $output = $input;
 
-        $isArithmetic = true;
-        foreach ($parts as &$part) {
-            if (preg_match("/^['\"][\s\S]*['\"]$/", $part)) {
-                /** is a string */
-                $isArithmetic = false;
-            } else {
-                /** Add dollar sign to variables */
-                $part = preg_replace("/([\+^'\")([a-z_]+[a-z0-9_]*)/i", "\$$1", $part);
+        /**
+         * Add $ to functions to prevent user from calling
+         * unauthorized or undefined functions.
+         */
+        $output = preg_replace_callback("/([\$]*[a-z_][a-z0-9]*)\(/i", function ($matches) {
+            $op = $matches[0];
+            if ($op[0] !== '$') {
+                $op = '$' . $op;
             }
-        }
-
-        $output = '';
-        if ($isArithmetic) {
-            $output = implode('+', $parts);
-        } else {
-            $output = implode('.', $parts);
-        }
+            return $op;
+        }, $output);
 
         return $output;
     }

@@ -4,13 +4,12 @@ namespace Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Meddle\Document;
-use Meddle\Exceptions\MeddleException;
 
 class DocumentTest extends TestCase
 {
     public function testRender()
     {
-        $output = Document::render(__DIR__.'/resources/template.html', [
+        $output = Document::render(__DIR__.'/resources/DocumentTest_testRender.html', [
             'message'    => 'Hello, world!'
         ]);
         $output = trim($output);
