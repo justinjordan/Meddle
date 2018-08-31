@@ -7,6 +7,15 @@
     <title>Meddle Example</title>
 </head>
 <body>
-    <p>{{ secretMessage }}</p>
-    <p>{{ 'Hello, world!' }}</p>
+    <h1>{{ toUpper('meddle') }}</h1>
+    <p mdl-if="$subheading">{{ $subheading }}</p>
+    <p>{%duration%} to render!</p>
+
+    <ul>
+        <li mdl-for="$i = 1; $i <= 100; $i++">
+            <span mdl-if="$i % 3 !== 0 && $i % 5 !== 0">{{ $i }}</span>
+            <span mdl-if="$i % 3 === 0">Fizz</span>
+            <span mdl-if="$i % 5 === 0">Buzz</span>
+        </li>
+    </ul>
 </html>
