@@ -2,6 +2,9 @@
 
 namespace Meddle\Services;
 
+use Meddle\Exceptions\SyntaxException;
+use Meddle\ErrorHandling\ErrorMessagePool;
+
 class Transpiler
 {
     /**
@@ -15,19 +18,23 @@ class Transpiler
         $templateContents = self::removePHP($templateContents);
 
         $document = new \DOMDocument('1.0', 'UTF-8');
+        $internalErrors = libxml_use_internal_errors(true);
         $document->loadHTML($templateContents);
+        libxml_use_internal_errors($internalErrors);
 
         /** Conditionals */
+        $attr = 'mdl-if';
         $xpath = new \DOMXPath($document);
-        $nodes = $xpath->query('//*[@mdl-if]');
+        $nodes = $xpath->query("//*[@$attr]");
         foreach ($nodes as $node) {
-            $attrValue = self::evaluate($node->getAttribute('mdl-if'));
-            $node->removeAttribute('mdl-if');
-            $parent = $node->parentNode;
+            $attrValue = $node->getAttribute($attr);
+            $attrValue = self::evaluate($attrValue);
+            $node->removeAttribute($attr);
 
             $openingTag = $document->createTextNode("{? if ($attrValue): ?}");
             $closingTag = $document->createTextNode("{? endif; ?}\n");
 
+            $parent = $node->parentNode;
             $parent->insertBefore($openingTag, $node);
             if ($node->nextSibling) {
                 $parent->insertBefore($closingTag, $node->nextSibling);
@@ -41,13 +48,14 @@ class Transpiler
         $xpath = new \DOMXPath($document);
         $nodes = $xpath->query("//*[@$attr]");
         foreach ($nodes as $node) {
-            $attrValue = self::evaluate($node->getAttribute($attr));
+            $attrValue = $node->getAttribute($attr);
+            $attrValue = self::evaluate($attrValue);
             $node->removeAttribute($attr);
-            $parent = $node->parentNode;
 
             $openingTag = $document->createTextNode("{? foreach ($attrValue): ?}");
             $closingTag = $document->createTextNode("{? endforeach; ?}\n");
 
+            $parent = $node->parentNode;
             $parent->insertBefore($openingTag, $node);
             if ($node->nextSibling) {
                 $parent->insertBefore($closingTag, $node->nextSibling);
@@ -61,13 +69,14 @@ class Transpiler
         $xpath = new \DOMXPath($document);
         $nodes = $xpath->query("//*[@$attr]");
         foreach ($nodes as $node) {
-            $attrValue = self::evaluate($node->getAttribute($attr));
+            $attrValue = $node->getAttribute($attr);
+            $attrValue = self::evaluate($attrValue);
             $node->removeAttribute($attr);
-            $parent = $node->parentNode;
 
             $openingTag = $document->createTextNode("{? for ($attrValue): ?}");
             $closingTag = $document->createTextNode("{? endfor; ?}\n");
 
+            $parent = $node->parentNode;
             $parent->insertBefore($openingTag, $node);
             if ($node->nextSibling) {
                 $parent->insertBefore($closingTag, $node->nextSibling);
@@ -76,11 +85,12 @@ class Transpiler
             }
         }
 
-        /** Interpolate Tags */
+        /** Mustache Tags */
         $xpath = new \DOMXPath($document);
         $nodes = $xpath->query("//text()");
         foreach ($nodes as $node) {
-            $node->textContent = self::replaceTags($node->textContent);
+            $value = $node->textContent;
+            $node->textContent = self::replaceTags($value);
         }
 
         $html = $document->saveHTML();
@@ -93,6 +103,9 @@ class Transpiler
      * Finds and replaces all mustache tags with PHP tags
      *
      * @param string $text
+     * 
+     * @throws SyntaxException
+     * 
      * @return string Returns replaced text
      */
     private static function replaceTags(string $text)

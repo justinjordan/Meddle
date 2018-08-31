@@ -45,6 +45,42 @@ class Caching
     }
 
     /**
+     * Removes cache file
+     *
+     * @param string $hash      Hash used to identify file
+     * @param string $type      PHP or HTML
+     *
+     * @throws MeddleException
+     *
+     * @return boolean  Returns true if successfully removed, or false
+     *                  Also true if file never existed
+     */
+    public static function removeFile(string $hash, string $type)
+    {
+        $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
+
+        $success = true;
+        $type = strtolower($type);
+        $path = '';
+        switch ($type) {
+            case 'php':
+            case 'html':
+                $dir = "$cacheDir/$type";
+                $path = "$dir/$hash.$type";
+                if (file_exists($path)) {
+                    $success = unlink($path);
+                }
+                break;
+        }
+
+        if (!$success) {
+            throw new MeddleException(ErrorMessagePool::get('cachingRemoveFileError'));
+        }
+
+        return $success;
+    }
+
+    /**
      * Gets cached file path
      *
      * @param string $hash  Hash used to identify file
@@ -70,6 +106,6 @@ class Caching
      */
     public static function setCacheDirectory(string $cacheDir)
     {
-        self::$cacheDir;
+        self::$cacheDir = $cacheDir;
     }
 }

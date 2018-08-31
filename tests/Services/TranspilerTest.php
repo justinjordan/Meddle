@@ -7,16 +7,10 @@ use Meddle\Services\Transpiler;
 
 class TranspilerTest extends TestCase
 {
-    public function testTranspile()
+    public function testMustacheTags()
     {
         $input = '<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Meddle Test</title>
-</head>
+<html>
 <body>
     <p>{{ \'Hello, world!\' }}</p>
     <p>{{ $message }}</p>
@@ -25,13 +19,7 @@ class TranspilerTest extends TestCase
 </html>';
 
         $expectedOutput = '<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Meddle Test</title>
-</head>
+<html>
 <body>
     <p><?php echo \'Hello, world!\'; ?></p>
     <p><?php echo $message; ?></p>
@@ -39,8 +27,42 @@ class TranspilerTest extends TestCase
 </body>
 </html>';
 
-        $output = trim(Transpiler::transpile($input));
+        $output = Transpiler::transpile($input);
 
-        $this->assertEquals($output, $expectedOutput);
+        $this->assertEquals($this->cleanWhiteSpace($output), $this->cleanWhiteSpace($expectedOutput));
+    }
+
+    public function testIfAttributes()
+    {
+        $input = '<!DOCTYPE html>
+<html>
+<body>
+        <p mdl-if="true">bing</p>
+        <p mdl-if="false">bing</p>
+</body>
+</html>';
+
+        $expectedOutput = '<!DOCTYPE html>
+<html>
+<body>
+        <?php if (true): ?><p>bing</p><?php endif; ?>
+        <?php if (false): ?><p>bing</p><?php endif; ?>
+</body>
+</html>';
+
+        $output = Transpiler::transpile($input);
+
+        $this->assertEquals($this->cleanWhiteSpace($output), $this->cleanWhiteSpace($expectedOutput));
+    }
+
+    private function cleanWhiteSpace($input)
+    {
+        $output = $input;
+
+        $output = str_replace("\n", '', $output);
+        $output = str_replace("\t", '', $output);
+        $output = trim($output);
+
+        return $output;
     }
 }

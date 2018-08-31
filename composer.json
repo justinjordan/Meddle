@@ -9,5 +9,10 @@
             "name": "Justin Jorddan",
             "email": "justinjordan831@gmail.com"
         }
-    ]
+    ],
+    "autoload": {
+        "psr-4": {
+            "Meddle\\": "src"
+        }
+    }
 }

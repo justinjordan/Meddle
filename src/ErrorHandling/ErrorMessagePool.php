@@ -4,7 +4,7 @@ namespace Meddle\ErrorHandling;
 
 class ErrorMessagePool
 {
-    public static function get(string $key)
+    public static function get(string $key, $arg = null)
     {
         $errorFilePath = __DIR__.'/errors.json';
         $errorsContents = file_get_contents($errorFilePath);
@@ -14,6 +14,8 @@ class ErrorMessagePool
             return "An error occurred!";
         }
 
-        return $errors[$key];
+        $error = sprintf($errors[$key], $arg);
+
+        return $error;
     }
 }
