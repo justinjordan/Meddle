@@ -1,12 +1,15 @@
 {
     "name": "sxule/meddle",
     "type": "library",
+    "description": "PHP templating engine with the front-end developer in mind.",
+    "keywords": [],
+    "license": "MIT",
     "require-dev": {
         "phpunit/phpunit": "^7.3"
     },
     "authors": [
         {
-            "name": "Justin Jorddan",
+            "name": "Justin Jordan",
             "email": "justinjordan831@gmail.com"
         }
     ],
