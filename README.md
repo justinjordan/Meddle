@@ -45,5 +45,3 @@ Twig is actually a nice templating engine. It's a bit verbose, but powerful and 
 	</div>
 
 If you're a front-end developer, you're probably comfortable with Meddle syntax thanks to Angular or VueJS. Meddle protects the server from script kiddie horrors like other templating systems, but is far more approachable for front-end developers.
-
-# Read the [DOCS](docs/index.md)
