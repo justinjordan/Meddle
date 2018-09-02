@@ -144,6 +144,12 @@ class Transpiler
         return $output;
     }
 
+    /**
+     * Replaces {? ?} blocks with <?php ?>
+     *
+     * @param string $input 
+     * @return void
+     */
     private static function replacePseudoTags(string $input) {
         $output = $input;
         
@@ -161,12 +167,22 @@ class Transpiler
     /**
      * Remove PHP tags for security
      *
+     * This prevents users from manually injecting their own scripts into the
+     * templates. Since templates are transpiled into a PHP file, without this
+     * they'd be able to write any code they wanted as long as it's wrapped in
+     * `<? ?>` or `{? ?}` tags.
+     *
      * @param string $templateContent
      * @return string Return new template
      */
     private static function removePHP(string $templateContent)
     {
+        /** Remove user PHP tags */
         $templateContent = preg_replace("/(<\?)([\s\S]+)(\?>)/", '', $templateContent);
+
+        /** Remove user pseudo tags */
+        $templateContent = preg_replace("/({\?)([\s\S]+)(\?})/", '', $templateContent);
+
         return $templateContent;
     }
 }

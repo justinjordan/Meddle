@@ -1,9 +1,8 @@
 {
-    "name": "meddle/meddle",
+    "name": "sxule/meddle",
     "type": "library",
     "require-dev": {
-        "phpunit/phpunit": "^7.3",
-        "phpdocumentor/phpdocumentor": "2.*"
+        "phpunit/phpunit": "^7.3"
     },
     "authors": [
         {
