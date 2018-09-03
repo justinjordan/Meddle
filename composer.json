@@ -4,6 +4,9 @@
     "description": "PHP templating engine with the front-end developer in mind.",
     "keywords": [],
     "license": "MIT",
+    "require": {
+        "php": "^7.0"
+    },
     "require-dev": {
         "phpunit/phpunit": "^7.3"
     },
