@@ -13,7 +13,7 @@ class TranspilerTest extends TestCase
 <html>
 <body>
     <p>{{ \'Hello, world!\' }}</p>
-    <p>{{ $message }}</p>
+    <p>{{ message }}</p>
     <p>{{ toUpper("all caps!") }}</p>
 </body>
 </html>';
@@ -27,9 +27,9 @@ class TranspilerTest extends TestCase
 </body>
 </html>';
 
-        $output = Transpiler::transpile($input);
+        $output = (new Transpiler())->transpile($input);
 
-        $this->assertEquals($this->cleanWhiteSpace($output), $this->cleanWhiteSpace($expectedOutput));
+        $this->assertEquals($this->cleanWhiteSpace($expectedOutput), $this->cleanWhiteSpace($output));
     }
 
     public function testIfAttributes()
@@ -50,9 +50,9 @@ class TranspilerTest extends TestCase
 </body>
 </html>';
 
-        $output = Transpiler::transpile($input);
+        $output = (new Transpiler())->transpile($input);
 
-        $this->assertEquals($this->cleanWhiteSpace($output), $this->cleanWhiteSpace($expectedOutput));
+        $this->assertEquals($this->cleanWhiteSpace($expectedOutput), $this->cleanWhiteSpace($output));
     }
 
     private function cleanWhiteSpace($input)

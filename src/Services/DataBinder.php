@@ -8,7 +8,7 @@ use Meddle\ErrorHandling\ErrorMessagePool;
 
 class DataBinder
 {
-    public static function bind(string $phpDocPath, array $data = [])
+    public function bind(string $phpDocPath, array $data = [])
     {
         if (!file_exists($phpDocPath)) {
             throw new MeddleException(ErrorMessagePool::get('dataBinderPhpFileNotFound'));
@@ -29,7 +29,7 @@ class DataBinder
     }
 
     /**
-     * Add functions to be used in templates.
+     * Add standard functions to be used in templates.
      *
      * @param array $data   Reference to template data
      * @return void

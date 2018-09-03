@@ -8,111 +8,102 @@ use Meddle\ErrorHandling\ErrorMessagePool;
 class Transpiler
 {
     /**
+     * Reference to document
+     *
+     * @var DOMDocument
+     */
+    private $document;
+
+    /**
      * Transpiles HTML document into PHP document
      *
      * @param string $templateContents
      * @return string PHP document.
      */
-    public static function transpile(string $templateContents)
+    public function transpile(string $templateContents)
     {
-        $templateContents = self::removePHP($templateContents);
+        $templateContents = $this->removePHP($templateContents);
 
         $document = new \DOMDocument('1.0', 'UTF-8');
+        $this->document = $document;
         $internalErrors = libxml_use_internal_errors(true);
         $document->loadHTML($templateContents);
         libxml_use_internal_errors($internalErrors);
 
-        /** Conditionals */
-        $attr = 'mdl-if';
-        $xpath = new \DOMXPath($document);
-        $nodes = $xpath->query("//*[@$attr]");
-        foreach ($nodes as $node) {
-            $attrValue = $node->getAttribute($attr);
-            $attrValue = self::evaluate($attrValue);
-            $node->removeAttribute($attr);
+        /** parse attributes */
+        $this->findAndTranspileAttribute('mdl-if');
+        $this->findAndTranspileAttribute('mdl-for');
+        $this->findAndTranspileAttribute('mdl-foreach');
 
-            $openingTag = $document->createTextNode("{? if ($attrValue): ?}");
-            $closingTag = $document->createTextNode("{? endif; ?}\n");
-
-            $parent = $node->parentNode;
-            $parent->insertBefore($openingTag, $node);
-            if ($node->nextSibling) {
-                $parent->insertBefore($closingTag, $node->nextSibling);
-            } else {
-                $parent->appendChild($closingTag);
-            }
-        }
-
-        /** Foreach Loops */
-        $attr = 'mdl-foreach';
-        $xpath = new \DOMXPath($document);
-        $nodes = $xpath->query("//*[@$attr]");
-        foreach ($nodes as $node) {
-            $attrValue = $node->getAttribute($attr);
-            $attrValue = self::evaluate($attrValue);
-            $node->removeAttribute($attr);
-
-            $openingTag = $document->createTextNode("{? foreach ($attrValue): ?}");
-            $closingTag = $document->createTextNode("{? endforeach; ?}\n");
-
-            $parent = $node->parentNode;
-            $parent->insertBefore($openingTag, $node);
-            if ($node->nextSibling) {
-                $parent->insertBefore($closingTag, $node->nextSibling);
-            } else {
-                $parent->appendChild($closingTag);
-            }
-        }
-
-        /** For Loops */
-        $attr = 'mdl-for';
-        $xpath = new \DOMXPath($document);
-        $nodes = $xpath->query("//*[@$attr]");
-        foreach ($nodes as $node) {
-            $attrValue = $node->getAttribute($attr);
-            $attrValue = self::evaluate($attrValue);
-            $node->removeAttribute($attr);
-
-            $openingTag = $document->createTextNode("{? for ($attrValue): ?}");
-            $closingTag = $document->createTextNode("{? endfor; ?}\n");
-
-            $parent = $node->parentNode;
-            $parent->insertBefore($openingTag, $node);
-            if ($node->nextSibling) {
-                $parent->insertBefore($closingTag, $node->nextSibling);
-            } else {
-                $parent->appendChild($closingTag);
-            }
-        }
-
-        /** Mustache Tags */
+        /** parse mustache tags */
         $xpath = new \DOMXPath($document);
         $nodes = $xpath->query("//text()");
         foreach ($nodes as $node) {
             $value = $node->textContent;
-            $node->textContent = self::replaceTags($value);
+            $node->textContent = $this->replaceTags($value);
         }
 
         $html = $document->saveHTML();
-        $html = self::replacePseudoTags($html);
+        $html = $this->replacePseudoTags($html);
 
         return $html;
+    }
+
+    private function findAndTranspileAttribute(string $attr) {
+        /**
+         * Define open/close tags
+         */
+        $open   = '';
+        $close  = '';
+        switch ($attr) {
+            case 'mdl-if':
+                $open   = "{? if (%s): ?}";
+                $close  = "{? endif; ?}";
+                break;
+            case 'mdl-for':
+                $open   = "{? for (%s): ?}";
+                $close  = "{? endfor; ?}";
+                break;
+            case 'mdl-foreach':
+                $open   = "{? foreach (%s): ?}";
+                $close  = "{? endforeach; ?}";
+                break;
+        }
+
+        $xpath = new \DOMXPath($this->document);
+        $nodes = $xpath->query("//*[@$attr]");
+        foreach ($nodes as $node) {
+            $attrValue = $node->getAttribute($attr);
+            $attrValue = $this->decorateVariables($attrValue);
+            $node->removeAttribute($attr);
+
+            $openingTag = $this->document->createTextNode(sprintf($open, $attrValue));
+            $closingTag = $this->document->createTextNode("$close\n");
+
+            $parent = $node->parentNode;
+            $parent->insertBefore($openingTag, $node);
+            if ($node->nextSibling) {
+                $parent->insertBefore($closingTag, $node->nextSibling);
+            } else {
+                $parent->appendChild($closingTag);
+            }
+        }
     }
 
     /**
      * Finds and replaces all mustache tags with PHP tags
      *
      * @param string $text
-     * 
+     *
      * @throws SyntaxException
-     * 
+     *
      * @return string Returns replaced text
      */
-    private static function replaceTags(string $text)
+    private function replaceTags(string $text)
     {
         $text = preg_replace_callback("/{{([^}]*)}}/", function ($m) {
             $tagContents = trim($m[1]);
-            $evaluated = self::evaluate($tagContents);
+            $evaluated = $this->decorateVariables($tagContents);
             return '{? echo '.$evaluated.'; ?}';
         }, $text);
 
@@ -120,26 +111,76 @@ class Transpiler
     }
 
     /**
-     * Converts Meddle syntax to PHP
+     * Locates variables and adds $ to them.
      *
      * @param string $input Meddle statement
+     *
      * @return string PHP statement
      */
-    private static function evaluate(string $input)
+    private function decorateVariables(string $input)
     {
-        $output = $input;
+        $inQuotes = false;
+        $escaped = false;
+        $closer = null;
 
-        /**
-         * Add $ to functions to prevent user from calling
-         * unauthorized or undefined functions.
-         */
-        $output = preg_replace_callback("/([\$]*[a-z_][a-z0-9]*)\(/i", function ($matches) {
-            $op = $matches[0];
-            if ($op[0] !== '$') {
+        $variableIndex = null;
+        $foundVariables = [];
+
+        /** find variables */
+        for ($index = 0, $len = strlen($input); $index < $len; $index++) {
+            $letter = $input[$index];
+
+            switch ($letter) {
+                case '"':
+                case "'":
+                    if (!$inQuotes) {
+                        /** start quote block */
+                        $inQuotes = true;
+                        $closer = $letter;
+                    } elseif ($inQuotes && $letter === $closer && !$escaped) {
+                        /** end quote block */
+                        $inQuotes = false;
+                        $closer = null;
+                    }
+                    break;
+                
+                default:
+                    /**
+                     * part of variable name
+                     */
+                    if (preg_match('/[a-z0-9_]/i', $letter) && !$inQuotes && $variableIndex === null) {
+                        $variableIndex = $index;
+                    }
+
+                    $nextIndex = $index + 1;
+                    if ($variableIndex !== null && ($nextIndex >= $len || !preg_match('/[a-z0-9_]/i', $input[$nextIndex]))) {
+                        /** get variable name */
+                        $variable = substr($input, $variableIndex, $nextIndex - $variableIndex);
+
+                        /** check variable name validity */
+                        if (preg_match('/[a-z_][a-z0-9_]*/i', $variable)) {
+                            $foundVariables[] = $variable;
+                        }
+
+                        /** reset index */
+                        $variableIndex = null;
+                    }
+                    break;
+            }
+
+            /** escape next character */
+            $escaped = $letter === '\\';
+        }
+
+        /** add $ to variables */
+        $skip = ['true', 'false', 'null'];
+        $output = preg_replace_callback('/\w+/', function ($m) use ($skip, $foundVariables) {
+            $op = $m[0];
+            if (!in_array($op, $skip) && in_array($op, $foundVariables)) {
                 $op = '$' . $op;
             }
             return $op;
-        }, $output);
+        }, $input);
 
         return $output;
     }
@@ -147,10 +188,11 @@ class Transpiler
     /**
      * Replaces {? ?} blocks with <?php ?>
      *
-     * @param string $input 
+     * @param string $input
+     *
      * @return void
      */
-    private static function replacePseudoTags(string $input) {
+    private function replacePseudoTags(string $input) {
         $output = $input;
         
         /** Decode HTML Special Chars */
@@ -173,9 +215,10 @@ class Transpiler
      * `<? ?>` or `{? ?}` tags.
      *
      * @param string $templateContent
+     *
      * @return string Return new template
      */
-    private static function removePHP(string $templateContent)
+    private function removePHP(string $templateContent)
     {
         /** Remove user PHP tags */
         $templateContent = preg_replace("/(<\?)([\s\S]+)(\?>)/", '', $templateContent);

@@ -18,7 +18,7 @@ class Document
      * @param array $options
      * @throws MeddleException
      */
-    public static function render(string $templatePath, array $data = [], array $options = [])
+    public function render(string $templatePath, array $data = [], array $options = [])
     {
         /** Set default options */
         $options = array_merge([
@@ -40,11 +40,12 @@ class Document
 
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
-            $phpDocument = Transpiler::transpile($templateContents);
+            $transpiler = new Transpiler();
+            $phpDocument = $transpiler->transpile($templateContents);
             $cachePath = Caching::saveFile($hash, 'php', $phpDocument);
         }
 
-        $output = DataBinder::bind($cachePath, $data);
+        $output = (new DataBinder())->bind($cachePath, $data);
 
         return $output;
     }

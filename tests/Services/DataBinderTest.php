@@ -18,11 +18,11 @@ class DataBinderTest extends TestCase
 ';
 
         $phpDocPath = dirname(__DIR__).'/resources/DataBinderTest_testBind.php';
-        $output = DataBinder::bind($phpDocPath, [
+        $output = (new DataBinder())->bind($phpDocPath, [
             'message'   => 'Hello, world!'
         ]);
 
-        $this->assertEquals($this->cleanWhiteSpace($output), $this->cleanWhiteSpace($expectedOutput));
+        $this->assertEquals($this->cleanWhiteSpace($expectedOutput), $this->cleanWhiteSpace($output));
     }
 
     private function cleanWhiteSpace($input)
