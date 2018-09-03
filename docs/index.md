@@ -1,6 +1,36 @@
 # Meddle Usage
 
-## Rendering Templates
+## Downloading
+
+Run the following in your terminal:
+
+**Composer**
+```
+$ composer require sxule/meddle
+```
+
+**Git**
+```
+$ git clone https://github.com/sXule/Meddle.git
+```
+
+## Including
+
+**Composer**
+```
+<?php
+
+require_once('path/to/vendor/autoload.php');
+```
+
+**Native**
+```
+<?php
+
+require_once('path/to/meddle/autoload.php');
+```
+
+# Rendering Templates
 
 *To use the Meddle library, either require `autoload.php` or require Composer's autoloader.*
 
@@ -71,7 +101,7 @@ Values inside of mustache tags will be outputted and rendered to the document.
 
 ***WARNING:** Currently, interpolation only works in DOM text; thus, they're unavailable in regular attributes. Attribute interpolation will be included in a future version.*
 
-# mdl-if
+# Conditionals
 
 Any element containing an `mdl-if` will be evaluated for falsity. If false, the element will be removed from the document.
 
@@ -86,7 +116,7 @@ Any element containing an `mdl-if` will be evaluated for falsity. If false, the 
 <p>This will be rendered.</p>
 ```
 
-# mdl-for
+# For Loops
 
 Any element containing an `mdl-for` attribute will be looped and duplicated for every iteration.
 
@@ -106,7 +136,7 @@ Any element containing an `mdl-for` attribute will be looped and duplicated for 
 </ul>
 ```
 
-# mdl-foreach
+# Foreach Loops
 
 Any element containing an `mdl-foreach` attribute will be looped and duplicated for every iteration.
 
