@@ -38,9 +38,11 @@ Twig is actually a nice templating engine. It's a bit verbose, but powerful and 
 
 **Meddle**
 
-	<div class="{{ $myclass }}">
+	<div class="{{ myclass }}">
 		<ul>
-			<li mdl-foreach="$listOfNames as $name">{{ $name }}</li>
+			<li mdl-foreach="listOfNames as name">
+                {{ name }}
+            </li>
 		</ul>
 	</div>
 

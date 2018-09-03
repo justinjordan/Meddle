@@ -9,7 +9,7 @@ class DocumentTest extends TestCase
 {
     public function testRender()
     {
-        $output = Document::render(__DIR__.'/resources/DocumentTest_testRender.html', [
+        $output = (new Document())->render(__DIR__.'/resources/DocumentTest_testRender.html', [
             'message'    => 'Hello, world!'
         ]);
         $output = trim($output);
@@ -23,11 +23,15 @@ class DocumentTest extends TestCase
     <title>Meddle Test</title>
 </head>
 <body>
+    <p>Single quotes</p>
+    <p>Double quotes</p>
+    <p>\' escaping</p>
+    <p>" escaping</p>
     <p>Hello, world!</p>
-    <p>Hello, world!</p>
+    <p>FUNCTIONS</p>
 </body>
 </html>';
         
-        $this->assertEquals($output, $expectedOutput);
+        $this->assertEquals($expectedOutput, $output);
     }
 }

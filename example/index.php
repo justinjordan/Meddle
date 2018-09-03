@@ -4,7 +4,7 @@ require '../autoload.php';
 
 $startTime = microtime(true);
 
-$markup = Meddle\Document::render('template.html', [
+$markup = (new Meddle\Document())->render('template.html', [
     'subheading'     => 'This is a demonstration of how the FizzBuzz problem looks in Meddle.',
 ], [
     'devMode'   => true
