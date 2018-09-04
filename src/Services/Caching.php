@@ -22,20 +22,13 @@ class Caching
     {
         $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
 
-        $bytes = false;
         $type = strtolower($type);
-        $path = '';
-        switch ($type) {
-            case 'php':
-            case 'html':
-                $dir = "$cacheDir/$type";
-                $path = "$dir/$hash.$type";
-                if (!is_dir($dir)) {
-                    mkdir($dir, 0755, true);
-                }
-                $bytes = file_put_contents($path, $content);
-                break;
+        $dir = "$cacheDir";
+        $path = "$dir/$hash.$type";
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
         }
+        $bytes = file_put_contents($path, $content);
 
         if (empty($path) || $bytes === false) {
             throw new MeddleException(ErrorMessagePool::get('cachingSaveFileError'));
@@ -61,16 +54,10 @@ class Caching
 
         $success = true;
         $type = strtolower($type);
-        $path = '';
-        switch ($type) {
-            case 'php':
-            case 'html':
-                $dir = "$cacheDir/$type";
-                $path = "$dir/$hash.$type";
-                if (file_exists($path)) {
-                    $success = unlink($path);
-                }
-                break;
+        $dir = "$cacheDir";
+        $path = "$dir/$hash.$type";
+        if (file_exists($path)) {
+            $success = unlink($path);
         }
 
         if (!$success) {
@@ -91,7 +78,7 @@ class Caching
     {
         $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
         $type = strtolower($type);
-        $path = "$cacheDir/$type/$hash.$type";
+        $path = "$cacheDir/$hash.$type";
 
         if (!file_exists($path)) {
             return null;

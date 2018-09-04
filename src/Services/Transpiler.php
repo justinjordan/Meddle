@@ -173,7 +173,7 @@ class Transpiler
         }
 
         /** add $ to variables */
-        $skip = ['true', 'false', 'null'];
+        $skip = ['true', 'false', 'null', 'as'];
         $output = preg_replace_callback('/\w+/', function ($m) use ($skip, $foundVariables) {
             $op = $m[0];
             if (!in_array($op, $skip) && in_array($op, $foundVariables)) {
