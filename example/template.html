@@ -8,18 +8,23 @@
 </head>
 <body>
     <h1>{{ toUpper('meddle') }}</h1>
-    <p mdl-if="subheading">{{ subheading }}</p>
-    <p>{%duration%} to render!</p>
 
+    <h2>mdl-if</h2>
+    <p mdl-if="subheading">{{ subheading }}</p>
+
+    <h2>mdl-for</h2>
     <ul>
-        <li mdl-for="i = 1; i <= 100; i++">
+        <li mdl-for="i = 1; i <= 20; i++">
             <span mdl-if="i % 3 !== 0 && i % 5 !== 0">{{ i }}</span>
             <span mdl-if="i % 3 === 0">Fizz</span>
             <span mdl-if="i % 5 === 0">Buzz</span>
         </li>
     </ul>
 
+    <h2>mdl-foreach</h2>
     <ul>
-        <li mdl-foreach="[1,2,3] as number">{{ number }}</li>
+        <li mdl-foreach="names as type => name">{{ type }}: {{ name }}</li>
     </ul>
+
+    <p>{%duration%} to render! (Note: devMode is on, so it renders slower than usual.)</p>
 </html>
