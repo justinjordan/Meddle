@@ -5,7 +5,12 @@ require '../autoload.php';
 $startTime = microtime(true);
 
 $markup = (new Meddle\Document())->render('template.html', [
-    'subheading'     => 'This is a demonstration of how the FizzBuzz problem looks in Meddle.',
+    'subheading'    => 'This is a demonstration of how the FizzBuzz problem looks in Meddle.',
+    'names'         => [
+        'First'         => 'Frank',
+        'Middle'        => 'William',
+        'Last'          => 'Abagnale',
+    ],
 ], [
     'devMode'   => true
 ]);
