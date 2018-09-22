@@ -20,7 +20,7 @@ class Caching
      */
     public static function saveFile(string $hash, string $type, string $content)
     {
-        $cacheDir = self::$cacheDir ?: dirname(__DIR__, 2).'/cache';
+        $cacheDir = self::$cacheDir ?: dirname(__DIR__, 1).'/cache';
 
         $type = strtolower($type);
         $dir = "$cacheDir";
