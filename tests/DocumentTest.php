@@ -34,4 +34,25 @@ class DocumentTest extends TestCase
         
         $this->assertEquals($expectedOutput, $output);
     }
+
+    public function testPHPRemoval()
+    {
+        $output = (new Document())->render(__DIR__ . '/resources/DocumentTest_testPHPRemoval.html');
+        $output = trim($output);
+        
+        $expectedOutput = '<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Meddle Test</title>
+</head>
+<body>
+
+</body>
+</html>';
+
+        $this->assertEquals($expectedOutput, $output);
+    }
 }
