@@ -18,7 +18,10 @@
     ],
     "autoload": {
         "psr-4": {
-            "Meddle\\": "src"
+            "Sxule\\Meddle\\": "src"
         }
+    },
+    "scripts": {
+        "test": "phpunit --bootstrap vendor/autoload.php tests/"
     }
 }

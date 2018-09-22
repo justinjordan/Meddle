@@ -21,6 +21,11 @@
         </li>
     </ul>
 
+    <h2>mdl-for to mdl-foreach</h2>
+    <ul>
+        <li mdl-for="name in names">{{ name }}</li>
+    </ul>
+
     <h2>mdl-foreach</h2>
     <ul>
         <li mdl-foreach="names as type => name">{{ type }}: {{ name }}</li>

@@ -1,9 +1,9 @@
 <?php
 
-namespace Meddle\Tests;
+namespace Sxule\Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Meddle\Services\Transpiler;
+use Sxule\Meddle\Transpiler;
 
 class TranspilerTest extends TestCase
 {
@@ -89,6 +89,27 @@ class TranspilerTest extends TestCase
 <html>
 <body>
         <?php for ($i = 1; $i <= 3; $i++): ?><p><?php echo $i; ?></p><?php endfor; ?>
+</body>
+</html>';
+
+        $output = (new Transpiler())->transpile($input);
+
+        $this->assertEquals($this->cleanWhiteSpace($expectedOutput), $this->cleanWhiteSpace($output));
+    }
+
+    public function testForJavascriptStyleSyntax()
+    {
+        $input = '<!DOCTYPE html>
+<html>
+<body>
+        <p mdl-for="letter in letters">{{ letter }}</p>
+</body>
+</html>';
+
+        $expectedOutput = '<!DOCTYPE html>
+<html>
+<body>
+        <?php foreach ($letters as $letter): ?><p><?php echo $letter; ?></p><?php endforeach; ?>
 </body>
 </html>';
 

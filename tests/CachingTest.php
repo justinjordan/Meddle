@@ -1,9 +1,9 @@
 <?php
 
-namespace Meddle\Tests;
+namespace Sxule\Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Meddle\Services\Caching;
+use Sxule\Meddle\Caching;
 
 class CachingTest extends TestCase
 {

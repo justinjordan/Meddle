@@ -1,12 +1,12 @@
 <?php
 
-namespace Meddle;
+namespace Sxule\Meddle;
 
-use Meddle\Exceptions\MeddleException;
-use Meddle\ErrorHandling\ErrorMessagePool;
-use Meddle\Services\Transpiler;
-use Meddle\Services\DataBinder;
-use Meddle\Services\Caching;
+use Sxule\Meddle\Transpiler;
+use Sxule\Meddle\DataBinder;
+use Sxule\Meddle\Caching;
+use Sxule\Meddle\Exceptions\MeddleException;
+use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
 class Document
 {

@@ -1,9 +1,9 @@
 <?php
 
-namespace Meddle\Tests;
+namespace Sxule\Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Meddle\Services\DataBinder;
+use Sxule\Meddle\DataBinder;
 
 class DataBinderTest extends TestCase
 {
@@ -17,7 +17,8 @@ class DataBinderTest extends TestCase
 </html>
 ';
 
-        $phpDocPath = dirname(__DIR__).'/resources/DataBinderTest_testBind.php';
+        $phpDocPath = __DIR__ . '/resources/DataBinderTest_testBind.php';
+
         $output = (new DataBinder())->bind($phpDocPath, [
             'message'   => 'Hello, world!'
         ]);

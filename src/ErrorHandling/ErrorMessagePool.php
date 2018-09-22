@@ -1,6 +1,6 @@
 <?php
 
-namespace Meddle\ErrorHandling;
+namespace Sxule\Meddle\ErrorHandling;
 
 class ErrorMessagePool
 {

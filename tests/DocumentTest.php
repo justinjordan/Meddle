@@ -1,15 +1,15 @@
 <?php
 
-namespace Meddle\Tests;
+namespace Sxule\Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Meddle\Document;
+use Sxule\Meddle\Document;
 
 class DocumentTest extends TestCase
 {
     public function testRender()
     {
-        $output = (new Document())->render(__DIR__.'/resources/DocumentTest_testRender.html', [
+        $output = (new Document())->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
             'message'    => 'Hello, world!'
         ]);
         $output = trim($output);

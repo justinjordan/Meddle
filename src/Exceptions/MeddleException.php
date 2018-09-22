@@ -1,6 +1,6 @@
 <?php
 
-namespace Meddle\Exceptions;
+namespace Sxule\Meddle\Exceptions;
 
 class MeddleException extends \Exception
 {

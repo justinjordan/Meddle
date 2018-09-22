@@ -1,9 +1,9 @@
 <?php
 
-namespace Meddle\Services;
+namespace Sxule\Meddle;
 
-use Meddle\Exceptions\MeddleException;
-use Meddle\ErrorHandling\ErrorMessagePool;
+use Sxule\Meddle\Exceptions\MeddleException;
+use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
 class Caching
 {
