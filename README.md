@@ -16,7 +16,7 @@ Put simply, Meddle is a PHP templating engine with clean HTML in mind. The other
 
 ```
 <ul>
-  <? foreach ($listOfNames as $name): ?>
+  <? foreach ($names as $name): ?>
     <li><?= $name ?></li>
   <? endforeach; ?>
 </ul>
@@ -28,7 +28,7 @@ Ya know, this actually isn't that bad. If you're using shorthand tags, vanilla P
 
 ```
 <ul>
-  {% for name in listOfNames %}
+  {% for name in names %}
     <li>{{ name }}</li>
   {% endfor %}
 </ul>
@@ -40,9 +40,7 @@ Twig is actually a nice templating engine. It's a bit verbose, but powerful and 
 
 ```
 <ul>
-  <li mdl-foreach="listOfNames as name">
-    {{ name }}
-  </li>
+  <li mdl-for="name in names">{{ name }}</li>
 </ul>
 ```
 
