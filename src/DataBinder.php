@@ -2,6 +2,7 @@
 
 namespace Sxule\Meddle;
 
+use Sxule\Meddle\TemplateFunctions;
 use Sxule\Meddle\Exceptions\MeddleException;
 use Sxule\Meddle\Exceptions\SyntaxException;
 use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
@@ -36,12 +37,17 @@ class DataBinder
      */
     private static function addFunctions(array &$data)
     {
-        $data['toUpper'] = function ($input) {
-            return strtoupper($input);
-        };
+        $scope = new TemplateScope();
 
-        $data['toLower'] = function ($input) {
-            return strtolower($input);
-        };
+        /** Add standard variables to template scope */
+        $data = array_merge($data, (array)$scope);
+
+        /** Add standard methods to template scope */
+        $methods = get_class_methods($scope);
+        foreach ($methods as $method) {
+            $data[$method] = function ($input) use ($scope, $method) {
+                return call_user_func([$scope, $method], $input);
+            };
+        }
     }
 }
