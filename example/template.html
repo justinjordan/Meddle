@@ -23,7 +23,7 @@
 
     <h2>mdl-for to mdl-foreach</h2>
     <ul>
-        <li mdl-for="name in names">{{ name }}</li>
+        <li mdl-for="(name, index) in names">{{ index }}: {{ name }}</li>
     </ul>
 
     <h2>mdl-foreach</h2>

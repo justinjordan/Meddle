@@ -55,6 +55,12 @@ class Transpiler
         }
 
         $html = $document->saveHTML();
+
+        /** get body only if template contents was a fragment */
+        if (!preg_match('/<html[^>]*>/i', $templateContents)) {
+            preg_match('/(<body[^>]*>)([\s\S]*)(<\/body>)/i', $html, $matches);
+            $html = $matches[2];
+        }
         $html = $this->replacePseudoTags($html);
 
         return $html;
