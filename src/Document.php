@@ -30,12 +30,12 @@ class Document
         if (!empty($options['cacheDir'])) {
             Caching::setCacheDirectory($options['cacheDir']);
         }
-
-        if (!file_exists($templatePath)) {
-            throw new MeddleException("Template not found!");
+        
+        $templateContents = $templatePath;
+        if (file_exists($templatePath)) {
+            $templateContents = file_get_contents($templatePath);
         }
 
-        $templateContents = file_get_contents($templatePath);
         $hash = md5($templateContents);
 
         $cachePath = Caching::getFilePath($hash, 'php');
