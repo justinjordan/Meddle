@@ -3,13 +3,13 @@
 namespace Sxule\Meddle\Tests;
 
 use PHPUnit\Framework\TestCase;
-use Sxule\Meddle\Document;
+use Sxule\Meddle;
 
-class DocumentTest extends TestCase
+class MeddleTest extends TestCase
 {
     public function testRender()
     {
-        $output = (new Document())->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
+        $output = (new Meddle())->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
             'message'    => 'Hello, world!'
         ]);
         $output = trim($output);
@@ -37,7 +37,7 @@ class DocumentTest extends TestCase
 
     public function testPHPRemoval()
     {
-        $output = (new Document())->render(__DIR__ . '/resources/DocumentTest_testPHPRemoval.html');
+        $output = (new Meddle())->render(__DIR__ . '/resources/DocumentTest_testPHPRemoval.html');
         $output = trim($output);
         
         $expectedOutput = '<!DOCTYPE html>

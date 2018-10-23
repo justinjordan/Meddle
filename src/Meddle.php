@@ -1,6 +1,6 @@
 <?php
 
-namespace Sxule\Meddle;
+namespace Sxule;
 
 use Sxule\Meddle\Transpiler;
 use Sxule\Meddle\DataBinder;
@@ -8,7 +8,7 @@ use Sxule\Meddle\Caching;
 use Sxule\Meddle\Exceptions\MeddleException;
 use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
-class Document
+class Meddle
 {
     /**
      * Render Meddle template.
