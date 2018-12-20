@@ -2,13 +2,14 @@
 
 namespace Sxule\Meddle;
 
+use DOMXPath;
+use DOMDocument;
 use Sxule\Meddle\Parser;
 use Sxule\Meddle\Transpiler\IfAttribute;
 use Sxule\Meddle\Transpiler\ForAttribute;
 use Sxule\Meddle\Transpiler\ForeachAttribute;
 use Sxule\Meddle\Exceptions\SyntaxException;
 use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
-use DOMXPath;
 
 class Transpiler
 {
@@ -23,13 +24,14 @@ class Transpiler
      * Transpiles HTML document into PHP document
      *
      * @param string $templateContents
+     *
      * @return string PHP document.
      */
     public function transpile(string $templateContents)
     {
         $templateContents = $this->removePHP($templateContents);
 
-        $document = new \DOMDocument('1.0', 'UTF-8');
+        $document = new DOMDocument('1.0', 'UTF-8');
         $this->document = $document;
         $internalErrors = libxml_use_internal_errors(true);
         $document->loadHTML($templateContents);
@@ -71,6 +73,7 @@ class Transpiler
      *
      * @param string    $attr
      * @param callable  $callback
+     *
      * @return void
      */
     private function findNodesWithAttr(string $attr, callable $callback)
@@ -95,7 +98,7 @@ class Transpiler
     {
         $text = preg_replace_callback("/{{([^}]*)}}/", function ($m) {
             $tagContents = trim($m[1]);
-            $evaluated = Parser::decorateVariables($tagContents);
+            $evaluated = Parser::parse($tagContents);
             return '{? echo '.$evaluated.'; ?}';
         }, $text);
 

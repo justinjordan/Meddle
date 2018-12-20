@@ -37,7 +37,7 @@ class ForAttribute extends BaseAttribute implements AttributeInterface
             }
         }
 
-        $statement = Parser::decorateVariables($statement);
+        $statement = Parser::parse($statement);
 
         self::wrapWithTags($node, "{? $type ($statement): ?}", "{? end$type; ?}");
     }

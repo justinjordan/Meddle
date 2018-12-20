@@ -22,7 +22,7 @@ class ForeachAttribute extends BaseAttribute implements AttributeInterface
         $statement = $node->getAttribute($attr);
         $node->removeAttribute($attr);
 
-        $statement = Parser::decorateVariables($statement);
+        $statement = Parser::parse($statement);
 
         self::wrapWithTags($node, "{? foreach ($statement): ?}", "{? endforeach; ?}");
     }

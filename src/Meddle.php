@@ -16,35 +16,39 @@ class Meddle
      * @param string $templatePath
      * @param array $data
      * @param array $options
+     *
      * @throws MeddleException
+     *
+     * @return string   Returns rendered HTML document
      */
-    public function render(string $templatePath, array $data = [], array $options = [])
+    public function render(string $templatePath, array $data = [], array $options = []): string
     {
-        /** Set default options */
+        // Set default options
         $options = array_merge([
-            'cacheDir'  => null,
-            'devMode'     => false,
+            'cacheDir' => null,
+            'devMode'  => false,
         ], $options);
 
-        /** Apply options */
+        // Apply options
         if (!empty($options['cacheDir'])) {
             Caching::setCacheDirectory($options['cacheDir']);
         }
         
+        // Load template
         $templateContents = $templatePath;
         if (file_exists($templatePath)) {
             $templateContents = file_get_contents($templatePath);
         }
 
+        // Cache dynamic document
         $hash = md5($templateContents);
-
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
-            $transpiler = new Transpiler();
-            $phpDocument = $transpiler->transpile($templateContents);
+            $phpDocument = (new Transpiler())->transpile($templateContents);
             $cachePath = Caching::saveFile($hash, 'php', $phpDocument);
         }
 
+        // Bind data to template
         $output = (new DataBinder())->bind($cachePath, $data);
 
         return $output;

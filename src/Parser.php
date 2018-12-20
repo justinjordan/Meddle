@@ -4,6 +4,25 @@ namespace Sxule\Meddle;
 
 class Parser
 {
+    public static function parse(string $input) : string
+    {
+        $output = $input;
+
+        $output = self::decorateVariables($output);
+        $output = self::convertDotsToBrackets($output);
+
+        return $output;
+    }
+
+    public static function convertDotsToBrackets(string $input) : string
+    {
+        $output = preg_replace_callback('/[\.][\$]([a-z_][a-z0-9_]*)/i', function ($m) {
+            return "['$m[1]']";
+        }, $input);
+
+        return $output;
+    }
+
     /**
      * Adds $ to variables
      *
@@ -11,7 +30,7 @@ class Parser
      *
      * @return string PHP statement
      */
-    public static function decorateVariables(string $input)
+    public static function decorateVariables(string $input) : string
     {
         $inQuotes = false;
         $escaped = false;
@@ -20,18 +39,18 @@ class Parser
         $variableIndex = null;
         $foundVariables = [];
 
-        /** find variables */
+        /** find variables by looping through characters */
         for ($index = 0, $len = strlen($input); $index < $len; $index++) {
-            $letter = $input[$index];
+            $character = $input[$index];
 
-            switch ($letter) {
+            switch ($character) {
                 case '"':
                 case "'":
                     if (!$inQuotes) {
                         /** start quote block */
                         $inQuotes = true;
-                        $closer = $letter;
-                    } elseif ($inQuotes && $letter === $closer && !$escaped) {
+                        $closer = $character;
+                    } elseif ($inQuotes && $character === $closer && !$escaped) {
                         /** end quote block */
                         $inQuotes = false;
                         $closer = null;
@@ -42,7 +61,7 @@ class Parser
                     /**
                      * part of variable name
                      */
-                    if (preg_match('/[a-z0-9_]/i', $letter) && !$inQuotes && $variableIndex === null) {
+                    if (preg_match('/[a-z0-9_]/i', $character) && !$inQuotes && $variableIndex === null) {
                         $variableIndex = $index;
                     }
 
@@ -63,17 +82,19 @@ class Parser
             }
 
             /** escape next character */
-            $escaped = $letter === '\\';
+            $escaped = $character === '\\';
         }
 
         /** add $ to variables */
         $skip = ['true', 'false', 'null', 'as'];
         $output = preg_replace_callback('/\w+/', function ($m) use ($skip, $foundVariables) {
-            $op = $m[0];
-            if (!in_array($op, $skip) && in_array($op, $foundVariables)) {
-                $op = '$' . $op;
+            $output = $m[0];
+
+            if (!in_array($output, $skip) && in_array($output, $foundVariables)) {
+                $output = '$' . $output;
             }
-            return $op;
+
+            return $output;
         }, $input);
 
         return $output;

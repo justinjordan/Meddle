@@ -7,6 +7,22 @@ use Sxule\Meddle;
 
 class MeddleTest extends TestCase
 {
+    public function setUp()
+    {
+        // remove cache directory
+        $cacheDir = __DIR__ . '/cache';
+        $cacheFiles = scandir($cacheDir);
+        foreach ($cacheFiles as $file) {
+            $path = $cacheDir . '/' . $file;
+            
+            if (is_dir($path)) {
+                continue;
+            }
+
+            unlink($path);
+        }
+    }
+
     public function testRender()
     {
         $output = (new Meddle())->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
@@ -54,5 +70,53 @@ class MeddleTest extends TestCase
 </html>';
 
         $this->assertEquals($expectedOutput, $output);
+    }
+
+    public function testArrayReplacement()
+    {
+        /**
+         * Test one level
+         */
+        $input = "<p>{{ myArray[0] }}</p>";
+        $data = [
+            'myArray' => ["Array contents."]
+        ];
+
+        $expected = "<p>" . $data['myArray'][0] . "</p>";
+        $actual = (new Meddle())->render($input, $data);
+
+        $this->assertEquals($expected, $actual);
+
+        /**
+         * Test two levels
+         */
+        $input = "<p>{{ level1.level2 }}</p>";
+        $data = [
+            'level1' => [
+                'level2' => "Contents"
+            ]
+        ];
+
+        $expected = "<p>" . $data['level1']['level2'] . "</p>";
+        $actual = (new Meddle())->render($input, $data);
+
+        $this->assertEquals($expected, $actual);
+
+        /**
+         * Test three levels with index
+         */
+        $input = "<p>{{ level1.level2[0] }}</p>";
+        $data = [
+            'level1' => [
+                'level2' => [
+                    "Contents"
+                ]
+            ]
+        ];
+
+        $expected = "<p>" . $data['level1']['level2'][0] . "</p>";
+        $actual = (new Meddle())->render($input, $data);
+
+        $this->assertEquals($expected, $actual);
     }
 }

@@ -31,5 +31,8 @@
         <li mdl-foreach="names as type => name">{{ type }}: {{ name }}</li>
     </ul>
 
+    <h2>Or access directly...</h2>
+    <p>{{ names.First }} {{ names.Middle }} {{ names.Last }}</p>
+
     <p>{%duration%} to render! (Note: devMode is on, so it renders slower than usual.)</p>
 </html>

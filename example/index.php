@@ -1,10 +1,10 @@
 <?php
 
-require '../autoload.php';
+require '../vendor/autoload.php';
 
 $startTime = microtime(true);
 
-$markup = (new Sxule\Meddle\Document())->render('template.html', [
+$markup = (new Sxule\Meddle())->render('template.html', [
     'subheading'    => 'This is a demonstration of how the FizzBuzz problem looks in Meddle.',
     'names'         => [
         'First'         => 'Frank',
@@ -12,7 +12,7 @@ $markup = (new Sxule\Meddle\Document())->render('template.html', [
         'Last'          => 'Abagnale',
     ],
 ], [
-    'devMode'   => true
+    'devMode'   => false
 ]);
 
 $duration = 1000 * (microtime(true) - $startTime);

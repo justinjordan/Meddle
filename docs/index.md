@@ -35,7 +35,7 @@ require_once('path/to/meddle/autoload.php');
 *To use the Meddle library, either require `autoload.php` or require Composer's autoloader.*
 
 ```
-Meddle\Document::render( string $templatePath [[, array $variables ], array $options ]);
+Sxule\Meddle::render( string $templatePath [[, array $variables ], array $options ]);
 ```
 
 * $templatePath
@@ -54,14 +54,14 @@ Meddle\Document::render( string $templatePath [[, array $variables ], array $opt
 ```
 <?php
 
-$output = (new Meddle\Document())->render('mytemplate.html');
+$output = (new Sxule\Meddle())->render('mytemplate.html');
 ```
 
 ### Render with Variables
 ```
 <?php
 
-$output = (new Meddle\Document())->render('mytemplate.html', [
+$output = (new Meddle())->render('mytemplate.html', [
     'myVariable'    => "Hello, world!",
     'myFunction'    => function ($input) {
 
@@ -78,7 +78,7 @@ $output = (new Meddle\Document())->render('mytemplate.html', [
 ```
 <?php
 
-$output = (new Meddle\Document())->render('mytemplate.html', [], [
+$output = (new Meddle())->render('mytemplate.html', [], [
     'cacheDir'  => 'path/to/cache/dir'
 ]);
 ```
