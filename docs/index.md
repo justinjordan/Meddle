@@ -2,14 +2,14 @@
 
 ## Downloading
 
-Run the following in your terminal:
+Run one of the following in your terminal:
 
-**Composer**
+**Method 1: Composer** (Recommended)
 ```
 $ composer require sxule/meddle
 ```
 
-**Git**
+**Method 2: Git**
 ```
 $ git clone https://github.com/sXule/Meddle.git
 ```
@@ -53,19 +53,21 @@ Sxule\Meddle::render( string $templatePath [[, array $variables ], array $option
 ### Basic Rendering
 ```
 <?php
+require_once(__DIR__ . '/vendor/autoload.php');
+$renderer = new Sxule\Meddle();
 
-$output = (new Sxule\Meddle())->render('mytemplate.html');
+$output = $renderer->render('mytemplate.html');
+
+echo $output;
 ```
 
-### Render with Variables
+### Render with Variables and/or Functions
 ```
-<?php
-
-$output = (new Meddle())->render('mytemplate.html', [
+$output = $renderer->render('mytemplate.html', [
     'myVariable'    => "Hello, world!",
     'myFunction'    => function ($input) {
 
-        /** do some stuff to $input */
+        // do some stuff to $input
 
         return $input;
     }
@@ -76,9 +78,7 @@ $output = (new Meddle())->render('mytemplate.html', [
 
 ### Render with Options
 ```
-<?php
-
-$output = (new Meddle())->render('mytemplate.html', [], [
+$output = $renderer->render('mytemplate.html', [], [
     'cacheDir'  => 'path/to/cache/dir'
 ]);
 ```
@@ -87,7 +87,7 @@ $output = (new Meddle())->render('mytemplate.html', [], [
 
 Values inside of mustache tags will be outputted and rendered to the document.
 
-**Input**
+**Template**
 ```
 <p>{{ "My name is " . toUpper(myName) }}</p>
 ```
@@ -96,16 +96,16 @@ Values inside of mustache tags will be outputted and rendered to the document.
 
 **Output**
 ```
-<p>My name is SXULE</p>
+<p>My name is JUSTIN</p>
 ```
 
-***WARNING:** Currently, interpolation only works in DOM text; thus, they're unavailable in regular attributes. Attribute interpolation will be included in a future version.*
+***WARNING:** Currently, interpolation only works in DOM text; thus, variables and functions are unavailable in regular attributes. Attribute interpolation will be included in a future version.*
 
 # Conditionals
 
 Any element containing an `mdl-if` will be evaluated for falsity. If false, the element will be removed from the document.
 
-**Input**
+**Template**
 ```
 <p mdl-if="true">This will be rendered.</p>
 <p mdl-if="false">This will NOT be rendered.</p>
@@ -120,7 +120,7 @@ Any element containing an `mdl-if` will be evaluated for falsity. If false, the 
 
 Any element containing an `mdl-for` attribute will be looped and duplicated for every iteration.
 
-**Input**
+**Template**
 ```
 <ul>
   <li mdl-for="i = 1; i <= 3; i++">{{ i }}</li>
@@ -136,23 +136,41 @@ Any element containing an `mdl-for` attribute will be looped and duplicated for 
 </ul>
 ```
 
-# Foreach Loops
+The `mdl-for` attribute also supports a for-in syntax like Javascript
 
-Any element containing an `mdl-foreach` attribute will be looped and duplicated for every iteration.
-
-**Input**
+**Template**
 ```
 <ul>
-  <li mdl-foreach="[1,2,3] as number">{{ number }}</li>
+  <li mdl-for="contact in contacts">{{ contact }}</li>
 </ul>
 ```
 
 **Output**
 ```
 <ul>
-  <li>1</li>
-  <li>2</li>
-  <li>3</li>
+  <li>Bruce Banner</li>
+  <li>Bucky Barnes</li>
+  <li>Peter Parker</li>
+</ul>
+```
+
+# Foreach Loops
+
+If you prefer a more PHP-like syntax, you can also use `mdl-foreach` attributes instead of the above for-in syntax. They function identically.
+
+**Template**
+```
+<ul>
+  <li mdl-foreach="contacts as contact">{{ contact }}</li>
+</ul>
+```
+
+**Output**
+```
+<ul>
+  <li>Bruce Banner</li>
+  <li>Bucky Barnes</li>
+  <li>Peter Parker</li>
 </ul>
 ```
 
