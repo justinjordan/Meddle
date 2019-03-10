@@ -16,18 +16,22 @@ $ git clone https://github.com/sXule/Meddle.git
 
 ## Including
 
-**Composer**
+**Method 1: Composer's Autoloader** (Recommended)
 ```
 <?php
 
 require_once('path/to/vendor/autoload.php');
+
+$meddle = Sxule/Meddle();
 ```
 
-**Native**
+**Method 2: Meddle's Autoloader**
 ```
 <?php
 
 require_once('path/to/meddle/autoload.php');
+
+$meddle = Sxule/Meddle();
 ```
 
 # Rendering Templates
@@ -45,25 +49,29 @@ Sxule\Meddle::render( string $templatePath [[, array $variables ], array $option
 * $options [optional]
     * Associative array of options
 
-## Availablie Options
+### Availablie Options
 
 * cacheDir [string] - Path to cache directory. Default: `meddle/cache`
 * devMode [boolean] - Transpiles template every load when true.
 
-### Basic Rendering
+## Basic Rendering
 ```
 <?php
+
 require_once(__DIR__ . '/vendor/autoload.php');
-$renderer = new Sxule\Meddle();
 
-$output = $renderer->render('mytemplate.html');
+$meddle = new Sxule\Meddle([
+  // default options
+]);
 
-echo $output;
+$markup = $meddle->render('mytemplate.html');
+
+echo $markup;
 ```
 
-### Render with Variables and/or Functions
+## Render with Variables and/or Functions
 ```
-$output = $renderer->render('mytemplate.html', [
+$output = $meddle->render('mytemplate.html', [
     'myVariable'    => "Hello, world!",
     'myFunction'    => function ($input) {
 
@@ -76,9 +84,9 @@ $output = $renderer->render('mytemplate.html', [
 
 ***Note:** Variables may contain values or callable functions, which can be used inside the template. Templates only have access to this scope and will not be able to call native constants, variables, or functions (i.e. exec).*
 
-### Render with Options
+## Render with Options
 ```
-$output = $renderer->render('mytemplate.html', [], [
+$output = $meddle->render('mytemplate.html', [], [
     'cacheDir'  => 'path/to/cache/dir'
 ]);
 ```

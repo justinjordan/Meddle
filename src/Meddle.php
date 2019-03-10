@@ -10,6 +10,16 @@ use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
 class Meddle
 {
+    protected $options;
+
+    public function __construct(array $options = []) {
+        // Set default options
+        $this->options = array_merge([
+            'cacheDir' => null,
+            'devMode'  => false,
+        ], $options);
+    }
+
     /**
      * Render Meddle template.
      *
@@ -23,11 +33,8 @@ class Meddle
      */
     public function render(string $templatePath, array $data = [], array $options = []): string
     {
-        // Set default options
-        $options = array_merge([
-            'cacheDir' => null,
-            'devMode'  => false,
-        ], $options);
+        // Override default options with argument
+        $options = array_merge($this->options, $options);
 
         // Apply options
         if (!empty($options['cacheDir'])) {

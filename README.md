@@ -12,28 +12,28 @@ Put simply, Meddle is a PHP templating engine with front-end developers in mind.
 
 ## Basic Usage
 
-### Template (mytemplate.html)
-```
-<ul>
-  <li mdl-for="name in names">{{ name }}</li>
-</ul>
-```
-
 ### PHP (index.php)
 ```
 <?php
 
 require_once(__DIR__ . '/vendor/autoload.php');
 
-$renderer = new Sxule\Meddle();
+$meddle = new Sxule\Meddle();
 
-echo $renderer->render('mytemplate.html', [
+echo $meddle->render('mytemplate.html', [
     'names' => [
         'John',
         'Teddy',
         'Jane'
     ]
 ]);
+```
+
+### Template (mytemplate.html)
+```
+<ul>
+  <li mdl-for="name in names">{{ name }}</li>
+</ul>
 ```
 
 ### Output

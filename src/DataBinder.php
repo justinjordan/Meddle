@@ -23,7 +23,7 @@ class DataBinder
             @include($phpDocPath);
             $output = ob_get_clean();
         } catch (\Throwable $e) {
-            throw new SyntaxException("Syntax error in template.");
+            throw new SyntaxException(ErrorMessagePool::get('transpilerSyntaxError'));
         }
 
         return $output;

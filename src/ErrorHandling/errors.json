@@ -1,19 +1,19 @@
 {
     "cachingSaveFileError": {
-        "en": "Failed to save cache file!"
+        "en": "Failed to save cache file"
     },
     "cachingRemoveFileError": {
-        "en": "Failed to remove cache file!"
+        "en": "Failed to remove cache file"
     },
     "cachingGetFilePathError": {
-        "en": "Failed to get cache file path!"
+        "en": "Failed to get cache file path"
     },
 
     "dataBinderPhpFileNotFound": {
-        "en": "PHP document was not found!"
+        "en": "PHP document was not found"
     },
 
     "transpilerSyntaxError": {
-        "en": "Template has a syntax error!"
+        "en": "Template has a syntax error"
     }
 }
