@@ -34,14 +34,16 @@ class Meddle
             Caching::setCacheDirectory($options['cacheDir']);
         }
         
-        // Load template
+        // Load template or use $templatePath as content
         $templateContents = $templatePath;
+        $hashInput = $templateContents;
         if (file_exists($templatePath)) {
             $templateContents = file_get_contents($templatePath);
+            $hashInput = $templatePath.filemtime($templatePath);
         }
 
         // Cache dynamic document
-        $hash = md5($templatePath.filemtime($templatePath));
+        $hash = md5($hashInput);
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
             $phpDocument = (new Transpiler())->transpile($templateContents);
