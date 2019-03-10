@@ -41,7 +41,7 @@ class Meddle
         }
 
         // Cache dynamic document
-        $hash = md5($templateContents);
+        $hash = md5($templatePath.filemtime($templatePath));
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
             $phpDocument = (new Transpiler())->transpile($templateContents);
