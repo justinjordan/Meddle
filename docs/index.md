@@ -36,8 +36,6 @@ $meddle = Sxule/Meddle();
 
 # Rendering Templates
 
-*To use the Meddle library, either require `autoload.php` or require Composer's autoloader.*
-
 ```
 Sxule\Meddle::render( string $templatePath [[, array $variables ], array $options ]);
 ```
@@ -47,7 +45,7 @@ Sxule\Meddle::render( string $templatePath [[, array $variables ], array $option
 * $variables [optional]
     * Associative array of values and/or callable functions.
 * $options [optional]
-    * Associative array of options
+    * Associative array of options. These will merge with options set in Meddle instance.
 
 ### Availablie Options
 
@@ -106,8 +104,6 @@ Values inside of mustache tags will be outputted and rendered to the document.
 ```
 <p>My name is JUSTIN</p>
 ```
-
-***WARNING:** Currently, interpolation only works in DOM text; thus, variables and functions are unavailable in regular attributes. Attribute interpolation will be included in a future version.*
 
 # Conditionals
 
@@ -182,3 +178,20 @@ If you prefer a more PHP-like syntax, you can also use `mdl-foreach` attributes 
 </ul>
 ```
 
+# Ignore Elements
+
+Mustache tags are used for many frontend frameworks, so you may want Meddle to ignore them sometimes. This can be accomplished using the `mdl-ignore` attribute on elements that should remain unaffected by Meddle.
+
+**Template**
+```
+<div mdl-ignore>
+  <p>{{ someVueJSVariable }}</p>
+</div>
+```
+
+**Output**
+```
+<div>
+  <p>{{ someVueJSVariable }}</p>
+</div>
+```

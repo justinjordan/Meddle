@@ -8,6 +8,7 @@ use Sxule\Meddle\Parser;
 use Sxule\Meddle\Transpiler\IfAttribute;
 use Sxule\Meddle\Transpiler\ForAttribute;
 use Sxule\Meddle\Transpiler\ForeachAttribute;
+use Sxule\Meddle\Transpiler\IgnoreAttribute;
 use Sxule\Meddle\Exceptions\SyntaxException;
 use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
@@ -37,7 +38,7 @@ class Transpiler
         $document->loadHTML($templateContents);
         libxml_use_internal_errors($internalErrors);
 
-        /** parse attributes */
+        // parse attributes
         $this->findNodesWithAttr('mdl-if', function ($node) {
             IfAttribute::transpileNode($node);
         });
@@ -48,17 +49,29 @@ class Transpiler
             ForeachAttribute::transpileNode($node);
         });
 
-        /** parse mustache tags */
-        $xpath = new DOMXPath($document);
-        $nodes = $xpath->query("//text()");
-        foreach ($nodes as $node) {
-            $value = $node->textContent;
-            $node->textContent = $this->replaceTags($value);
-        }
+        // parse mustache tags
+        $this->forAllNodes($document, function ($node) {
+            switch ($node->nodeName) {
+                case '#text':
+                    $value = $node->textContent;
+                    $node->textContent = $this->replaceTags($value);
+                    break;
+                default:
+                    foreach ($node->attributes as $attr) {
+                        $attr->value = $this->replaceTags($attr->value);
+                    }
+                    break;
+            }
+        });
+
+        // remove mdl-ignore attributes
+        $this->findNodesWithAttr('mdl-ignore', function ($node) {
+            IgnoreAttribute::transpileNode($node);
+        });
 
         $html = $document->saveHTML();
 
-        /** get body only if template contents was a fragment */
+        // get body only if template contents was a fragment
         if (!preg_match('/<html[^>]*>/i', $templateContents)) {
             preg_match('/(<body[^>]*>)([\s\S]*)(<\/body>)/i', $html, $matches);
             $html = $matches[2];
@@ -66,6 +79,23 @@ class Transpiler
         $html = $this->replacePseudoTags($html);
 
         return $html;
+    }
+
+    /**
+     * Run callback for all nodes in the document
+     * 
+     * @param DOMDocument $document
+     * @param callable    $callable
+     * 
+     * @return void
+     */
+    private function forAllNodes(DOMDocument $document, callable $callback)
+    {
+        $xpath = new DOMXPath($document);
+        $nodes = $xpath->query("//node()[not(ancestor::*[@mdl-ignore])]");
+        foreach ($nodes as $node) {
+            $callback($node);
+        }
     }
 
     /**
@@ -115,7 +145,7 @@ class Transpiler
     private function replacePseudoTags(string $input) {
         $output = $input;
         
-        /** Decode HTML Special Chars */
+        // Decode HTML Special Chars
         $output = preg_replace_callback("/\{\?([^\?]*)\?\}/", function ($m) {
             return htmlspecialchars_decode($m[0]);
         }, $output);
@@ -140,10 +170,10 @@ class Transpiler
      */
     private function removePHP(string $templateContent)
     {
-        /** Remove user PHP tags */
+        // Remove user PHP tags
         $templateContent = preg_replace("/(<\?)([\s\S]+)(\?>)/", '', $templateContent);
 
-        /** Remove user pseudo tags */
+        // Remove user pseudo tags
         $templateContent = preg_replace("/({\?)([\s\S]+)(\?})/", '', $templateContent);
 
         return $templateContent;

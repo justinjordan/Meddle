@@ -21,11 +21,14 @@ class MeddleTest extends TestCase
 
             unlink($path);
         }
+
+        // init renderer
+        $this->meddle = new Meddle();
     }
 
     public function testRender()
     {
-        $output = (new Meddle())->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
+        $output = $this->meddle->render(__DIR__ . '/resources/DocumentTest_testRender.html', [
             'message'    => 'Hello, world!'
         ]);
         $output = trim($output);
@@ -51,9 +54,41 @@ class MeddleTest extends TestCase
         $this->assertEquals($expectedOutput, $output);
     }
 
+    public function testAttributeInterpolation()
+    {
+        $output = $this->meddle->render('<div data-test="{{ message }}"></div>', [
+            'message'   => 'hello',
+        ]);
+
+        $expectedOutput = '<div data-test="hello"></div>';
+
+        $this->assertEquals($expectedOutput, $output);
+    }
+
+    public function testMdlIgnore()
+    {
+        // Test single level
+        $output = $this->meddle->render('<div mdl-ignore>{{ message }}</div>', [
+            'message'   => 'hello',
+        ]);
+
+        $expectedOutput = '<div>{{ message }}</div>';
+
+        $this->assertEquals($expectedOutput, $output);
+
+        // Test multi-level
+        $output = $this->meddle->render('<div mdl-ignore><p>{{ message }}</p></div>', [
+            'message'   => 'hello',
+        ]);
+
+        $expectedOutput = '<div><p>{{ message }}</p></div>';
+
+        $this->assertEquals($expectedOutput, $output);
+    }
+
     public function testPHPRemoval()
     {
-        $output = (new Meddle())->render(__DIR__ . '/resources/DocumentTest_testPHPRemoval.html');
+        $output = $this->meddle->render(__DIR__ . '/resources/DocumentTest_testPHPRemoval.html');
         $output = trim($output);
         
         $expectedOutput = '<!DOCTYPE html>
@@ -83,7 +118,7 @@ class MeddleTest extends TestCase
         ];
 
         $expected = "<p>" . $data['myArray'][0] . "</p>";
-        $actual = (new Meddle())->render($input, $data);
+        $actual = $this->meddle->render($input, $data);
 
         $this->assertEquals($expected, $actual);
 
@@ -98,7 +133,7 @@ class MeddleTest extends TestCase
         ];
 
         $expected = "<p>" . $data['level1']['level2'] . "</p>";
-        $actual = (new Meddle())->render($input, $data);
+        $actual = $this->meddle->render($input, $data);
 
         $this->assertEquals($expected, $actual);
 
@@ -115,7 +150,7 @@ class MeddleTest extends TestCase
         ];
 
         $expected = "<p>" . $data['level1']['level2'][0] . "</p>";
-        $actual = (new Meddle())->render($input, $data);
+        $actual = $this->meddle->render($input, $data);
 
         $this->assertEquals($expected, $actual);
     }
