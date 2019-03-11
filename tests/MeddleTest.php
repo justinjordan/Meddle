@@ -67,6 +67,20 @@ class MeddleTest extends TestCase
         $this->assertEquals($expectedOutput, $output);
     }
 
+    public function testDataOptions()
+    {
+        $meddle = new Meddle([
+            'data'  => [
+                'message'   => 'works'
+            ],
+        ]);
+        $output = $meddle->render('<p>{{ message }}</p>');
+
+        $expectedOutput = '<p>works</p>';
+
+        $this->assertEquals($expectedOutput, $output);
+    }
+
     public function testAttributeInterpolation()
     {
         $output = $this->meddle->render('<div data-test="{{ message }}"></div>', [
