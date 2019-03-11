@@ -17,7 +17,7 @@ class ErrorMessagePool
             return "An error occurred!";
         }
 
-        $error = sprintf($errors[$key][$lang], $arg);
+        $error = sprintf($errors[$key][$lang], (string)$arg);
 
         return $error;
     }

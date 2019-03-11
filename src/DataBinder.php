@@ -2,7 +2,6 @@
 
 namespace Sxule\Meddle;
 
-use Sxule\Meddle\TemplateFunctions;
 use Sxule\Meddle\Exceptions\MeddleException;
 use Sxule\Meddle\Exceptions\SyntaxException;
 use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
@@ -23,7 +22,8 @@ class DataBinder
             @include($phpDocPath);
             $output = ob_get_clean();
         } catch (\Throwable $e) {
-            throw new SyntaxException(ErrorMessagePool::get('transpilerSyntaxError'));
+            ob_clean();
+            throw new SyntaxException(ErrorMessagePool::get('transpilerSyntaxError', $e->getLine()));
         }
 
         return $output;

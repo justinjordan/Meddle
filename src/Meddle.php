@@ -15,9 +15,12 @@ class Meddle
     public function __construct(array $options = []) {
         // Set default options
         $this->options = array_merge([
-            'cacheDir' => null,
-            'devMode'  => false,
+            'cacheDir'  => null,
+            'devMode'   => false,
+            'data' => [],
         ], $options);
+
+        $this->validateOptions($this->options);
     }
 
     /**
@@ -37,6 +40,7 @@ class Meddle
         $options = array_merge($this->options, $options);
 
         // Apply options
+        $this->validateOptions($options);
         if (!empty($options['cacheDir'])) {
             Caching::setCacheDirectory($options['cacheDir']);
         }
@@ -57,9 +61,22 @@ class Meddle
             $cachePath = Caching::saveFile($hash, 'php', $phpDocument);
         }
 
+        // Add options data to scope
+        foreach ($options['data'] as $name => $variable) {
+            $data[$name] = $variable;
+        }
+
         // Bind data to template
         $output = (new DataBinder())->bind($cachePath, $data);
 
         return $output;
+    }
+
+    protected function validateOptions($options)
+    {
+        // data must be array or object
+        if (!in_array(gettype($options['data']), ['array', 'object'])) {
+            throw new MeddleException(ErrorMessagePool::get('optionsBadData'));
+        }
     }
 }

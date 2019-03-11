@@ -54,6 +54,19 @@ class MeddleTest extends TestCase
         $this->assertEquals($expectedOutput, $output);
     }
 
+    public function testCustomFunctions()
+    {
+        $output = $this->meddle->render('<div>{{ myFunction() }}</div>', [
+            'myFunction'    => function () {
+                return 'works';
+            },
+        ]);
+
+        $expectedOutput = '<div>works</div>';
+
+        $this->assertEquals($expectedOutput, $output);
+    }
+
     public function testAttributeInterpolation()
     {
         $output = $this->meddle->render('<div data-test="{{ message }}"></div>', [

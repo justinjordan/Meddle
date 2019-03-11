@@ -1,4 +1,7 @@
 {
+    "optionsBadData": {
+        "en": "Options 'data' property must be an array or object"
+    },
     "cachingSaveFileError": {
         "en": "Failed to save cache file"
     },
@@ -14,6 +17,6 @@
     },
 
     "transpilerSyntaxError": {
-        "en": "Template has a syntax error"
+        "en": "Syntax error in template"
     }
 }
