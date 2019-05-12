@@ -10,7 +10,8 @@ use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 
 class Meddle
 {
-    protected $options;
+    protected $templateDir = '';
+    protected $options = [];
 
     public function __construct(array $options = []) {
         // Set default options
@@ -21,6 +22,16 @@ class Meddle
         ], $options);
 
         $this->validateOptions($this->options);
+    }
+
+    public function getTemplateDir()
+    {
+        return $this->templateDir;
+    }
+
+    public function setTemplateDir(string $templateDir)
+    {
+        $this->templateDir = $templateDir;
     }
 
     /**
@@ -57,7 +68,7 @@ class Meddle
         $hash = md5($hashInput);
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
-            $phpDocument = (new Transpiler())->transpile($templateContents);
+            $phpDocument = (new Transpiler($this))->transpile($templateContents);
             $cachePath = Caching::saveFile($hash, 'php', $phpDocument);
         }
 

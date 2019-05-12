@@ -2,8 +2,11 @@
 
 namespace Sxule\Meddle;
 
+use DOMNode;
 use DOMXPath;
+use Exception;
 use DOMDocument;
+use Sxule\Meddle;
 use Sxule\Meddle\Parser;
 use Sxule\Meddle\Transpiler\IfAttribute;
 use Sxule\Meddle\Transpiler\ForAttribute;
@@ -15,11 +18,38 @@ use Sxule\Meddle\ErrorHandling\ErrorMessagePool;
 class Transpiler
 {
     /**
-     * Reference to document
-     *
+     * @var Meddle
+     */
+    private $meddle;
+
+    /**
      * @var DOMDocument
      */
     private $document;
+
+    public function __construct(Meddle $meddle)
+    {
+        $this->meddle = $meddle;
+    }
+
+    /**
+     * Loads HTML document
+     *
+     * @param string $templateContents
+     *
+     * @return DOMDocument
+     */
+    public function loadDocument(string $templateContents)
+    {
+        $document = new DOMDocument('1.0', 'UTF-8');
+
+        $templateContents = $this->removePHP($templateContents);
+        $internalErrors = libxml_use_internal_errors(true);
+        $document->loadHTML($templateContents);
+        libxml_use_internal_errors($internalErrors);
+
+        return $document;
+    }
 
     /**
      * Transpiles HTML document into PHP document
@@ -30,13 +60,53 @@ class Transpiler
      */
     public function transpile(string $templateContents)
     {
-        $templateContents = $this->removePHP($templateContents);
+        // used later to strip html, head, and body tags
+        $wasFragment = !preg_match('/<html/i', $templateContents);
 
-        $document = new DOMDocument('1.0', 'UTF-8');
-        $this->document = $document;
-        $internalErrors = libxml_use_internal_errors(true);
-        $document->loadHTML($templateContents);
-        libxml_use_internal_errors($internalErrors);
+        $this->document = $this->loadDocument($templateContents);
+
+        // parse tags
+        $this->findNodesByTag('mdl-extend', function ($node) use (&$wasFragment) {
+            // get extension blocks
+            $blocks = [];
+            $this->findNodesByTag('mdl-block', function ($node) use (&$blocks) {
+                $name = $node->getAttribute('name');
+                $blocks[$name] = $node;
+            }, $node);
+
+            // load extended template
+            $templatePath = $node->getAttribute('template');
+
+            if ($templatePath[0] !== '/') {
+                $templateDir = $this->meddle->getTemplateDir();
+                if (!empty($templateDir)) {
+                    $templatePath = $templateDir.'/'.$templatePath;
+                }
+            }
+
+            if (!file_exists($templatePath)) {
+                throw new Exception(ErrorMessagePool::get('transpilerMissingExtendTemplate', $templatePath));
+            }
+
+            $templateContents = file_get_contents($templatePath);
+            $wasFragment = !preg_match('/<html/i', $templateContents);
+
+            $this->document = $this->loadDocument($templateContents);
+
+            // replace blocks
+            $this->findNodesByTag('mdl-block', function($replacedBlock) use (&$blocks) {
+                $name = $replacedBlock->getAttribute('name');
+
+                if (!isset($blocks[$name])) {
+                    return;
+                }
+
+                $importedBlock = $this->document->importNode($blocks[$name], true);
+                $replacedBlock->parentNode->replaceChild($importedBlock, $replacedBlock);
+
+                $this->removeWrappingElement($importedBlock);
+            });
+        });
 
         // parse attributes
         $this->findNodesWithAttr('mdl-if', function ($node) {
@@ -50,7 +120,7 @@ class Transpiler
         });
 
         // parse mustache tags
-        $this->forAllNodes($document, function ($node) {
+        $this->forAllNodes($this->document, function ($node) {
             switch ($node->nodeName) {
                 case '#text':
                     $value = $node->textContent;
@@ -69,10 +139,10 @@ class Transpiler
             IgnoreAttribute::transpileNode($node);
         });
 
-        $html = $document->saveHTML();
+        $html = $this->document->saveHTML();
 
         // get body only if template contents was a fragment
-        if (!preg_match('/<html[^>]*>/i', $templateContents)) {
+        if ($wasFragment && !preg_match('/<html[^>]*>/i', $templateContents)) {
             preg_match('/(<body[^>]*>)([\s\S]*)(<\/body>)/i', $html, $matches);
             $html = $matches[2];
         }
@@ -93,6 +163,23 @@ class Transpiler
     {
         $xpath = new DOMXPath($document);
         $nodes = $xpath->query("//node()[not(ancestor::*[@mdl-ignore])]");
+        foreach ($nodes as $node) {
+            $callback($node);
+        }
+    }
+
+    /**
+     * Finds nodes with tag name and runs callback
+     *
+     * @param string    $tagName
+     * @param callable  $callback
+     *
+     * @return void
+     */
+    private function findNodesByTag(string $tagName, callable $callback, DOMNode $context = null)
+    {
+        $xpath = new DOMXPath($this->document);
+        $nodes = $xpath->query("//$tagName", $context);
         foreach ($nodes as $node) {
             $callback($node);
         }
@@ -192,5 +279,17 @@ class Transpiler
         }
 
         return $code;
+    }
+
+    private function removeWrappingElement(DOMNode $element)
+    {
+        $sibling = $element->firstChild;
+
+        do {
+            $next = $sibling->nextSibling;
+            $element->parentNode->insertBefore($sibling, $element);
+        } while($sibling = $next);
+
+        $element->parentNode->removeChild($element);
     }
 }

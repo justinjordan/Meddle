@@ -18,5 +18,8 @@
 
     "transpilerSyntaxError": {
         "en": "Syntax error in template"
+    },
+    "transpilerMissingExtendTemplate": {
+        "en": "Template `%s` not found"
     }
 }
