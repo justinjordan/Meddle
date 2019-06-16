@@ -46,4 +46,4 @@ echo $meddle->render('mytemplate.html', [
 </ul>
 ```
 
-# Read the [DOCS](https://github.com/sXule/Meddle/tree/master/docs/index.md)
+# Read the [DOCS](./docs/index.md)
