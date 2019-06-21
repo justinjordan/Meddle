@@ -24,16 +24,18 @@ class Transpiler
     /**
      * Transpiles HTML document into PHP document
      *
-     * @param string $templateContents
+     * @param string $templateContents  Template HTML
+     * @param array  $components        Array of component classes
      *
      * @return string PHP document.
      */
-    public function transpile(string $templateContents)
+    public function transpile(string $templateContents, array $components = [])
     {
         $templateContents = $this->removePHP($templateContents);
 
         $document = new DOMDocument('1.0', 'UTF-8');
         $this->document = $document;
+
         $internalErrors = libxml_use_internal_errors(true);
         $document->loadHTML($templateContents);
         libxml_use_internal_errors($internalErrors);
@@ -69,6 +71,9 @@ class Transpiler
             IgnoreAttribute::transpileNode($node);
         });
 
+        // Register custom components to prevent DOM error
+        $this->registerComponents($document, $components);
+
         $html = $document->saveHTML();
 
         // get body only if template contents was a fragment
@@ -79,6 +84,28 @@ class Transpiler
         $html = $this->replacePseudoTags($html);
 
         return $html;
+    }
+
+    private function registerComponents(DOMDocument $document, array $components)
+    {
+        foreach ($components as $tagName => $className) {
+            // if (!class_exists($className)) {
+            //     continue;
+            // }
+
+            if (is_numeric($tagName)) {
+                $parts = explode('\\', $className);
+                $name = array_pop($parts);
+                $words = preg_split("/(?=[A-Z])/", $name);
+                $words = array_filter($words);
+
+                $tagName = strtolower(implode('-', $words));
+            }
+
+            $this->findNodesByName($tagName, function ($node) use ($className) {
+                new $className($node);
+            });
+        }
     }
 
     /**
@@ -99,7 +126,23 @@ class Transpiler
     }
 
     /**
-     * Finds nodes containing specified attribute and runs callback
+     * finds nodes by name and runs callback
+     *
+     * @param string    $name
+     * @param callable  $callback
+     *
+     * @return void
+     */
+    private function findNodesByName(string $tagName, callable $callback)
+    {
+        $nodes = $this->document->getElementsByTagName($tagName);
+        foreach ($nodes as $node) {
+            $callback($node);
+        }
+    }
+
+    /**
+     * finds nodes containing specified attribute and runs callback
      *
      * @param string    $attr
      * @param callable  $callback
@@ -108,7 +151,7 @@ class Transpiler
      */
     private function findNodesWithAttr(string $attr, callable $callback)
     {
-        $xpath = new DOMXPath($this->document);
+        $xpath = new domxpath($this->document);
         $nodes = $xpath->query("//*[@$attr]");
         foreach ($nodes as $node) {
             $callback($node);

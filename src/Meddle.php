@@ -15,9 +15,10 @@ class Meddle
     public function __construct(array $options = []) {
         // Set default options
         $this->options = array_merge([
-            'cacheDir'  => null,
-            'devMode'   => false,
-            'data' => [],
+            'cacheDir'      => null,
+            'devMode'       => false,
+            'data'          => [],
+            'components'    => [],
         ], $options);
 
         $this->validateOptions($this->options);
@@ -57,7 +58,8 @@ class Meddle
         $hash = md5($hashInput);
         $cachePath = Caching::getFilePath($hash, 'php');
         if ($options['devMode'] === true || empty($cachePath)) {
-            $phpDocument = (new Transpiler())->transpile($templateContents);
+            $phpDocument = (new Transpiler())->
+                transpile($templateContents, $this->options['components']);
             $cachePath = Caching::saveFile($hash, 'php', $phpDocument);
         }
 
