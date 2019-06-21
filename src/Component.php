@@ -2,6 +2,8 @@
 
 namespace Sxule\Meddle;
 
+use DOMNode;
+
 abstract class Component
 {
     protected $document;
@@ -9,15 +11,8 @@ abstract class Component
 
     abstract public function render();
 
-    public function __construct($node)
+    public function __construct($props)
     {
-        $this->document = $node->ownerDocument;
-        $this->props = [];
-        foreach ($node->attributes as $attr) {
-            $this->props[$attr->nodeName] = $attr->nodeValue;
-        }
-
-        print_r($this->props);
-        die();
+        $this->props = json_decode($props, true);
     }
 }

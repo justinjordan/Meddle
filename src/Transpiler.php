@@ -72,7 +72,7 @@ class Transpiler
         });
 
         // Register custom components to prevent DOM error
-        $this->registerComponents($document, $components);
+        $this->registerComponents($components);
 
         $html = $document->saveHTML();
 
@@ -86,12 +86,12 @@ class Transpiler
         return $html;
     }
 
-    private function registerComponents(DOMDocument $document, array $components)
+    private function registerComponents(array $components)
     {
         foreach ($components as $tagName => $className) {
-            // if (!class_exists($className)) {
-            //     continue;
-            // }
+            if (!class_exists($className)) {
+                continue;
+            }
 
             if (is_numeric($tagName)) {
                 $parts = explode('\\', $className);
@@ -103,7 +103,15 @@ class Transpiler
             }
 
             $this->findNodesByName($tagName, function ($node) use ($className) {
-                new $className($node);
+                $props = [];
+                foreach ($node->attributes as $attr) {
+                    $props[$attr->nodeName] = $attr->nodeValue;
+                }
+
+                $parent = $node->parentNode;
+                $textNode = $this->document->createTextNode("{? echo (new \\$className('".json_encode($props)."'))->render(); ?}");
+                $parent->insertBefore($textNode, $node);
+                $parent->removeChild($node);
             });
         }
     }
