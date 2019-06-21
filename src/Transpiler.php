@@ -109,7 +109,10 @@ class Transpiler
                 }
 
                 $parent = $node->parentNode;
-                $textNode = $this->document->createTextNode("{? echo (new \\$className('".json_encode($props)."'))->render(); ?}");
+                $textNode = $this->document
+                    ->createTextNode(
+                        "{? echo \\Sxule\\Meddle\\TemplateService::renderComponent('\\$className','". serialize($props) ."'); ?}"
+                    );
                 $parent->insertBefore($textNode, $node);
                 $parent->removeChild($node);
             });

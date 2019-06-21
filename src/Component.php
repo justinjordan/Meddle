@@ -11,6 +11,6 @@ abstract class Component
 
     public function __construct($props)
     {
-        $this->props = json_decode($props, true);
+        $this->props = $props;
     }
 }
