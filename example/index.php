@@ -4,7 +4,11 @@ require '../vendor/autoload.php';
 
 $startTime = microtime(true);
 
-$markup = (new Sxule\Meddle())->render('template.html', [
+$markup = (new Sxule\Meddle([
+    'components'    => [
+        Meddle\example\components\TestComponent::class,
+    ],
+]))->render('template.html', [
     'subheading'    => 'This is a demonstration of how the FizzBuzz problem looks in Meddle.',
     'names'         => [
         'First'         => 'Frank',

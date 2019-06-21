@@ -20,7 +20,8 @@
     "autoload": {
         "psr-4": {
             "Sxule\\": "src",
-            "Sxule\\Meddle\\": "src"
+            "Sxule\\Meddle\\": "src",
+            "Meddle\\example\\": "example"
         }
     },
     "scripts": {

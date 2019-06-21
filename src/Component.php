@@ -2,8 +2,6 @@
 
 namespace Sxule\Meddle;
 
-use DOMNode;
-
 abstract class Component
 {
     protected $document;
