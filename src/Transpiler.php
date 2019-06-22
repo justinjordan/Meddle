@@ -88,6 +88,13 @@ class Transpiler
         return $html;
     }
 
+    /**
+     * Parses document for components and renders their markup
+     *
+     * @param array $components  Array of component class names
+     *
+     * @return void
+     */
     private function registerComponents(array $components)
     {
         foreach ($components as $tagName => $className) {
