@@ -29,7 +29,7 @@ class Transpiler
      *
      * @return string PHP document.
      */
-    public function transpile(string $templateContents, array $components = [])
+    public function transpile(string $templateContents, array $components = [], bool $replacePseudoTags = true)
     {
         $templateContents = $this->removePHP($templateContents);
 
@@ -83,7 +83,10 @@ class Transpiler
             preg_match('/(<body[^>]*>)([\s\S]*)(<\/body>)/i', $html, $matches);
             $html = $matches[2];
         }
-        $html = $this->replacePseudoTags($html);
+
+        if ($replacePseudoTags) {
+            $html = $this->replacePseudoTags($html);
+        }
 
         return $html;
     }
@@ -111,13 +114,13 @@ class Transpiler
                 $tagName = strtolower(implode('-', $words));
             }
 
-            $this->findNodesByName($tagName, function ($node) use ($className) {
-                $document = $node->ownerDocument;
-                $parent = $node->parentNode;
+            $this->findNodesByName($tagName, function ($componentNode) use ($className) {
+                $document = $componentNode->ownerDocument;
+                $parent = $componentNode->parentNode;
 
                 // get props
                 $props = [];
-                foreach ($node->attributes as $attr) {
+                foreach ($componentNode->attributes as $attr) {
                     $props[$attr->nodeName] = $attr->nodeValue;
                 }
 
@@ -126,15 +129,28 @@ class Transpiler
                 $markup = $component->render($props);
 
                 // recursively transpile
-                $markup = self::transpile($markup, $component->components);
+                $markup = self::transpile($markup, $component->components, false);
 
                 // create DOM fragment
                 $fragment = $document->createDocumentFragment();
                 $fragment->appendXML($markup);
 
                 // inject fragment into document
-                $parent->insertBefore($fragment, $node);
-                $parent->removeChild($node);
+                $parent->insertBefore($fragment, $componentNode);
+
+                $this->findNodesByName('slot', function ($slotNode) use ($componentNode) {
+                    $parent = $slotNode->parentNode;
+
+                    foreach ($componentNode->childNodes as $childNode) {
+                        $parent->insertBefore($childNode->cloneNode(true), $slotNode);
+                    }
+
+                    // remove slot
+                    $parent->removeChild($slotNode);
+                }, $fragment);
+
+                // remove component node
+                $parent->removeChild($componentNode);
             });
         }
     }
@@ -164,12 +180,26 @@ class Transpiler
      *
      * @return void
      */
-    private function findNodesByName(string $tagName, callable $callback)
+    private function findNodesByName(string $tagName, callable $callback, $context = null)
     {
-        $nodes = $this->document->getElementsByTagName($tagName);
+        $document = $this->document;
+
+        if (is_object($context)) {
+            switch (get_class($context)) {
+                case 'DOMDocument':
+                    $document = $context;
+                    break;
+                default:
+                    $document = $context->ownerDocument;
+                    break;
+            }
+        }
+
+        $xpath = new DOMXPath($document);
+        $nodes = $xpath->query("//$tagName", $context);
         foreach ($nodes as $node) {
             $callback($node);
-        }
+        } 
     }
 
     /**
