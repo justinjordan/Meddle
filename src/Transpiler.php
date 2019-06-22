@@ -105,6 +105,7 @@ class Transpiler
                 continue;
             }
 
+            // auto-generate tagName if $components is keyed by int
             if (is_numeric($tagName)) {
                 $parts = explode('\\', $className);
                 $name = array_pop($parts);
@@ -114,6 +115,7 @@ class Transpiler
                 $tagName = strtolower(implode('-', $words));
             }
 
+            // find component in document
             $this->findNodesByName($tagName, function ($componentNode) use ($className) {
                 $document = $componentNode->ownerDocument;
                 $parent = $componentNode->parentNode;
@@ -128,28 +130,44 @@ class Transpiler
                 $component = new $className();
                 $markup = $component->render($props);
 
-                // recursively transpile
+                // recursively transpile component
                 $markup = self::transpile($markup, $component->components, false);
 
-                // create DOM fragment
-                $fragment = $document->createDocumentFragment();
-                $fragment->appendXML($markup);
+                // create document for component
+                $snippetDocument = new DOMDocument('1.0', 'UTF-8');
+                $internalErrors = libxml_use_internal_errors(true);
+                $snippetDocument->loadHTML($markup);
+                libxml_use_internal_errors($internalErrors);
 
-                // inject fragment into document
-                $parent->insertBefore($fragment, $componentNode);
+                // replace slots
+                $this->findNodesByName('slot', function ($slotNode) use ($snippetDocument, $componentNode) {
+                    $slotParent = $slotNode->parentNode;
 
-                $this->findNodesByName('slot', function ($slotNode) use ($componentNode) {
-                    $parent = $slotNode->parentNode;
+                    // import component into snippet document
+                    $importedComponentNode = $snippetDocument->importNode($componentNode, true);
 
-                    foreach ($componentNode->childNodes as $childNode) {
-                        $parent->insertBefore($childNode->cloneNode(true), $slotNode);
+                    // add component children at slot
+                    foreach ($importedComponentNode->childNodes as $childNode) {
+                        $slotParent->insertBefore($childNode->cloneNode(true), $slotNode);
                     }
 
                     // remove slot
-                    $parent->removeChild($slotNode);
-                }, $fragment);
+                    $slotParent->removeChild($slotNode);
+                }, $snippetDocument);
 
-                // remove component node
+                // add snippet to main document on node at a time
+                $body = $snippetDocument->getElementsByTagName('body')->item(0);
+                foreach ($body->childNodes as $snippetNode) {
+                    $newNode = $document->importNode($snippetNode, true);
+
+                    // skip if couldn't be copied
+                    if ($newNode === false) {
+                        continue;
+                    }
+
+                    $parent->insertBefore($newNode, $componentNode);
+                }
+
                 $parent->removeChild($componentNode);
             });
         }
