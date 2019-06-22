@@ -51,6 +51,9 @@ class Transpiler
             ForeachAttribute::transpileNode($node);
         });
 
+        // Register custom components to prevent DOM error
+        $this->registerComponents($components);
+
         // parse mustache tags
         $this->forAllNodes($document, function ($node) {
             switch ($node->nodeName) {
@@ -59,8 +62,10 @@ class Transpiler
                     $node->textContent = $this->replaceTags($value);
                     break;
                 default:
-                    foreach ($node->attributes as $attr) {
-                        $attr->value = $this->replaceTags($attr->value);
+                    if ($node->hasAttributes()) {
+                        foreach ($node->attributes as $attr) {
+                            $attr->value = $this->replaceTags($attr->value);
+                        }
                     }
                     break;
             }
@@ -70,9 +75,6 @@ class Transpiler
         $this->findNodesWithAttr('mdl-ignore', function ($node) {
             IgnoreAttribute::transpileNode($node);
         });
-
-        // Register custom components to prevent DOM error
-        $this->registerComponents($components);
 
         $html = $document->saveHTML();
 
@@ -103,17 +105,28 @@ class Transpiler
             }
 
             $this->findNodesByName($tagName, function ($node) use ($className) {
+                $document = $node->ownerDocument;
+                $parent = $node->parentNode;
+
+                // get props
                 $props = [];
                 foreach ($node->attributes as $attr) {
                     $props[$attr->nodeName] = $attr->nodeValue;
                 }
 
-                $parent = $node->parentNode;
-                $textNode = $this->document
-                    ->createTextNode(
-                        "{? echo \\Sxule\\Meddle\\TemplateService::renderComponent('\\$className','". serialize($props) ."'); ?}"
-                    );
-                $parent->insertBefore($textNode, $node);
+                // create component and render
+                $component = new $className();
+                $markup = $component->render($props);
+
+                // recursively transpile
+                $markup = self::transpile($markup, $component->components);
+
+                // create DOM fragment
+                $fragment = $document->createDocumentFragment();
+                $fragment->appendXML($markup);
+
+                // inject fragment into document
+                $parent->insertBefore($fragment, $node);
                 $parent->removeChild($node);
             });
         }
